@@ -23,7 +23,6 @@ function getAllData(){
     const sheet = ss.getActiveSheet();
     const values = sheet.getDataRange().getValues();
     const headerValue = values.splice(0, 1)[0];
-    let headerObj = {}
     return values.map((row)=>{
         let obj = {};
         row.map((item, index) => {
