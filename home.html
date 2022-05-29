@@ -14,10 +14,15 @@
       <p class="mx-auto m-8 px-10">WIP: vueコンポーネントからGASテンプレートに変えてみた</p>
     </div>
     <?!= include('header'); ?>
-    <div class="container mx-auto py-4">
-      <form v-on:submit.prevent>
+    <div class="container mx-auto px-8 py-4">
+      <form v-on:submit.prevent class="w-full flex">
         <!-- <input type="text" v-model="newItem"> -->
-        <button v-on:click="loadData" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">データ取得！</button>
+        <div class="flex-shrink-0 flex-1 px-2">
+          <input class="w-full bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-green-500" id="inline-keyword" type="text" value="" placeholder="けんさくワード">
+        </div>
+        <div class="flex-shrink-0 flex-1 px-2">
+          <button v-on:click="loadData" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">けんさく！</button>
+       </div>
       </form>
     </div>
     <!-- テーブルのヘッダーどこでどうしようか迷ったがhtml側にハードコーディングといくぜ -->
