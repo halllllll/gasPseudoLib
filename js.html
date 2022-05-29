@@ -1,8 +1,27 @@
 <script>
   const app = Vue.createApp({
     data: ()=>({
-      message: "HELLLLLLLLLOOOOOOO"
+      newItem: '',
+      allData: [],
     }),
+    methods: {
+      addItem: function(event){
+        console.log("CLICK")
+      },
+      loadData: async function(){
+        const sheetData = await this.getData();
+        console.log("YES");
+        this.allData = sheetData;
+      },
+      getData: function(){
+        return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler((result) => resolve(result))
+          .withFailureHandler((error) => resolve(error))
+          .getAllData();
+      });
+      },
+    }
   });
   app.mount("#app")
 </script>
