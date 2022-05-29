@@ -16,7 +16,8 @@ function include(filename) {
 
 /**
  * Vueのgoogle.script.runから呼ばれる
- * とりあえずsheetの全データを返す（二次元配列だがJsonとして返す）
+ * とりあえずsheetの全データを返す（Jsonとして返す）
+ * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
 function getAllData(){
     const sheet = ss.getActiveSheet();

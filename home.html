@@ -9,9 +9,10 @@
 <body>
   <div id="app">
     <form v-on:submit.prevent>
-      <input type="text" v-model="newItem">
-      <button v-on:click="addItem">Add</button>
+      <!-- <input type="text" v-model="newItem"> -->
+      <!-- <button v-on:click="loadData">データ取得！</button> -->
       <button v-on:click="loadData">データ取得！</button>
+
     </form>    
     <pre>{{$data}}</pre>
   </div>

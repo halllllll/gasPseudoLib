@@ -1,13 +1,15 @@
 <script>
   const app = Vue.createApp({
     data: ()=>({
-      newItem: '',
-      allData: [],
+      allData: null,
     }),
     methods: {
       addItem: function(event){
         console.log("CLICK")
       },
+    },
+    // 算出プロパティのほうはsetterができるのとキャッシュが効くらしい
+    methods: {
       loadData: async function(){
         const sheetData = await this.getData();
         console.log("YES");
@@ -21,7 +23,7 @@
           .getAllData();
       });
       },
-    }
+    },
   });
   app.mount("#app")
 </script>
