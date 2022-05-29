@@ -2,6 +2,15 @@
   const app = Vue.createApp({
     data: ()=>({
       items: null,
+      tableHeader: [
+        // {"title": "本の名前"},
+        // {"author":"著者"},
+        // {"genre": "分類"},
+        // {"publisher": "出版社"},
+        // {"is_rented": "貸出状況"},
+        // {"image": "画像URL"},
+        "本の名前", "著者", "分類", "出版社", "貸出状況", "画像URL"
+      ]
     }),
     methods: {
       addItem: function(event){
@@ -11,6 +20,7 @@
         const sheetData = await this.getData();
         console.log("YES");
         this.items = sheetData;
+        console.log(`items`);
         console.log(this.items);
       },
       getData: function(){

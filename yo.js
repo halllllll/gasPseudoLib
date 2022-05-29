@@ -22,11 +22,12 @@ function include(filename) {
 function getAllData(){
     const sheet = ss.getActiveSheet();
     const values = sheet.getDataRange().getValues();
-    const header = values.splice(0, 1)[0];
-    return values.map(function(row) {
+    const headerValue = values.splice(0, 1)[0];
+    let headerObj = {}
+    return values.map((row)=>{
         let obj = {};
         row.map((item, index) => {
-          obj[String(header[index])] = String(item);
+          obj[String(headerValue[index])] = String(item);
         });
         return obj;
       });

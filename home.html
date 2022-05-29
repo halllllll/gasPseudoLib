@@ -12,12 +12,32 @@
       <!-- <input type="text" v-model="newItem"> -->
       <!-- <button v-on:click="loadData">データ取得！</button> -->
       <button v-on:click="loadData">データ取得！</button>
-      <ul>
-        <li v-for="item in items">
-          {{ item["本の名前"] }}
-        </li>
-      </ul>
-    </form>    
+    </form>
+    <!-- テーブルのヘッダーどこでどうしようか迷ったがhtml側にハードコーディングといくぜ -->
+    <ul>
+      <li v-for="h in tableHeader">
+        {{h.text}}
+      </li>
+    </ul>
+    <p>テーブルここから</p>
+    <table>
+      <thead>
+        <tr>
+          <th v-for="(h, idx) in tableHeader" v-bind:key="idx">{{h}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(row, idx) in items" v-bind:key="idx">
+          <td v-for="h in tableHeader">{{row[h]}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>テーブルここまで</p>
+    <ul>
+      <li v-for="item in items">
+        {{ item["本の名前"] }}
+      </li>
+    </ul>
     <pre>{{$data}}</pre>
   </div>
   <script src="https://unpkg.com/vue@3.1.5"></script>
