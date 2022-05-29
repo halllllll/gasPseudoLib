@@ -12,7 +12,11 @@
       <!-- <input type="text" v-model="newItem"> -->
       <!-- <button v-on:click="loadData">データ取得！</button> -->
       <button v-on:click="loadData">データ取得！</button>
-
+      <ul>
+        <li v-for="item in items">
+          {{ item["本の名前"] }}
+        </li>
+      </ul>
     </form>    
     <pre>{{$data}}</pre>
   </div>

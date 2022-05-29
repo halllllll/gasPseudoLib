@@ -1,7 +1,7 @@
 <script>
   const app = Vue.createApp({
     data: ()=>({
-      allData: null,
+      items: null,
     }),
     methods: {
       addItem: function(event){
@@ -10,7 +10,8 @@
       loadData: async function(){
         const sheetData = await this.getData();
         console.log("YES");
-        this.allData = sheetData;
+        this.items = sheetData;
+        console.log(this.items);
       },
       getData: function(){
         return new Promise((resolve, reject) => {
