@@ -11,10 +11,12 @@
     
   <div id="app">
     <header-component></header-component>
-    <form v-on:submit.prevent>
-      <!-- <input type="text" v-model="newItem"> -->
-      <button v-on:click="loadData" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">データ取得！</button>
-    </form>
+    <div class="container mx-auto py-4">
+      <form v-on:submit.prevent>
+        <!-- <input type="text" v-model="newItem"> -->
+        <button v-on:click="loadData" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">データ取得！</button>
+      </form>
+    </div>
     <!-- テーブルのヘッダーどこでどうしようか迷ったがhtml側にハードコーディングといくぜ -->
     <ul>
       <li v-for="h in tableHeader">
@@ -23,25 +25,20 @@
     </ul>
     <p>テーブルここから</p>
     <div class="container mx-auto px-8">
-      <table class="table-auto">
+      <table class="w-full table-auto">
         <thead>
           <tr>
-            <th v-for="(h, idx) in tableHeader" v-bind:key="idx" class="px-4 py-2">{{h}}</th>
+            <th v-for="(h, idx) in tableHeader" v-bind:key="idx" class="px-6 py-3">{{h}}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(row, idx) in items" v-bind:key="idx" class="bg-gray-300">
-            <td v-for="h in tableHeader" class="border px-4 py-2">{{row[h]}}</td>
+          <tr v-for="(row, idx) in items" v-bind:key="idx" class="bg-gray-100 border-b border-gray-700 mx-4 my-8">
+            <td v-for="h in tableHeader" class="border">{{row[h]}}</td>
           </tr>
         </tbody>
       </table>
     </div>
     <p>テーブルここまで</p>
-    <ul>
-      <li v-for="item in items">
-        {{ item["本の名前"] }}
-      </li>
-    </ul>
     <pre>{{$data}}</pre>
   </div>
   <!-- vue.js -->
