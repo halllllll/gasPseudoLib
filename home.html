@@ -18,12 +18,15 @@
       <form v-on:submit.prevent class="w-full flex">
         <!-- <input type="text" v-model="newItem"> -->
         <div class="flex-shrink-0 flex-1 px-2">
-          <input class="w-full bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-green-500" id="inline-keyword" type="text" value="" placeholder="けんさくワード">
+          <input class="w-full bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-green-500" id="inline-searchWords" type="text" value="" placeholder="けんさくワード" v-model="searchWords">
         </div>
         <div class="flex-shrink-0 flex-1 px-2">
           <button v-on:click="loadData" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">けんさく！</button>
        </div>
       </form>
+      <pre>
+        {{searchWords}}
+      </pre>
     </div>
     <!-- テーブルのヘッダーどこでどうしようか迷ったがhtml側にハードコーディングといくぜ -->
     <ul>
