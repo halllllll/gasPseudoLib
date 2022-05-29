@@ -7,9 +7,6 @@
       addItem: function(event){
         console.log("CLICK")
       },
-    },
-    // 算出プロパティのほうはsetterができるのとキャッシュが効くらしい
-    methods: {
       loadData: async function(){
         const sheetData = await this.getData();
         console.log("YES");
