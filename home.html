@@ -3,15 +3,17 @@
 <head>
   <base target="_top">
   <meta charset="utf-8">
+  <!-- tailwind -->
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
   <?!= include('css'); ?>
-  <!-- vue.js -->
 </head>
 <body>
+    
   <div id="app">
+    <header-component></header-component>
     <form v-on:submit.prevent>
       <!-- <input type="text" v-model="newItem"> -->
-      <!-- <button v-on:click="loadData">データ取得！</button> -->
-      <button v-on:click="loadData">データ取得！</button>
+      <button v-on:click="loadData" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">データ取得！</button>
     </form>
     <!-- テーブルのヘッダーどこでどうしようか迷ったがhtml側にハードコーディングといくぜ -->
     <ul>
@@ -20,18 +22,20 @@
       </li>
     </ul>
     <p>テーブルここから</p>
-    <table>
-      <thead>
-        <tr>
-          <th v-for="(h, idx) in tableHeader" v-bind:key="idx">{{h}}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row, idx) in items" v-bind:key="idx">
-          <td v-for="h in tableHeader">{{row[h]}}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="container mx-auto px-8">
+      <table class="table-auto">
+        <thead>
+          <tr>
+            <th v-for="(h, idx) in tableHeader" v-bind:key="idx" class="px-4 py-2">{{h}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, idx) in items" v-bind:key="idx" class="bg-gray-300">
+            <td v-for="h in tableHeader" class="border px-4 py-2">{{row[h]}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <p>テーブルここまで</p>
     <ul>
       <li v-for="item in items">
@@ -40,6 +44,7 @@
     </ul>
     <pre>{{$data}}</pre>
   </div>
+  <!-- vue.js -->
   <script src="https://unpkg.com/vue@3.1.5"></script>
   <?!= include('js'); ?>
 </body>
