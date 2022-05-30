@@ -17,8 +17,15 @@
       addItem: function(event){
         console.log("CLICK")
       },
-      loadData: async function(){
-        const sheetData = await this.getData();
+      loadData: async function(event){
+        let sheetData = null;
+        if(this.searchWords === ""){
+          sheetData = await this.getData();
+        }else{
+          sheetData = await this.searchData();
+        }
+        // なぜかsearchWordsがないと言われた
+        // sheetData = await this.searchData();
         this.items = sheetData;
         console.log(`items`);
         console.log(this.items);
@@ -29,8 +36,18 @@
           .withSuccessHandler((result) => resolve(result))
           .withFailureHandler((error) => resolve(error))
           .getAllData();
-      });
+        });
       },
+      searchData: function(){
+        return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler((result) => resolve(result))
+          .withFailureHandler((error) => resolve(error))
+          .search(this.searchWords);
+        });
+      },
+
+
     },
   });
 

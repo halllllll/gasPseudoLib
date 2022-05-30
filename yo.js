@@ -33,3 +33,24 @@ function getAllData(){
         return obj;
       });
 }
+
+/**
+ * ワードが含まれる行を取得したい
+ * @param {string} words 
+ * @returns 
+ */
+function search(words){
+  // とくにjsonとか考えなくても文字列のまま取得できた
+  console.log(`words: ${words}`);
+  const sheet = ss.getActiveSheet();
+  const values = sheet.getDataRange().getValues();
+  const headerValue = values.splice(0, 1)[0];
+  return values.map((row)=>{
+      let obj = {};
+      row.map((item, index) => {
+        obj[String(headerValue[index])] = String(item);
+      });
+      return obj;
+    });
+}
+
