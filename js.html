@@ -1,24 +1,28 @@
 <script>
   const app = Vue.createApp({
     data: ()=>({
-      searchWords: '',
+      searchWords: "",
       items: null,
-      tableHeader: ["本の名前", "人名", "出版社", "分類"],
+      // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
+      tableHeader: ["本の名前", "人名", "出版者", "分類"],
       sheetHeader: [
         "title", "author", "publisher", "genre", 
       ],
+      message: "",
     }),
     methods: {
       addItem: function(event){
         console.log("CLICK")
       },
       loadData: async function(event){
+        this.message = "けんさくちゅう..."
         let sheetData = null;
         if(this.searchWords === ""){
           sheetData = await this.getData();
         }else{
           sheetData = await this.searchData();
         }
+        this.message = "けんさくけっか！";
         this.items = sheetData;
         console.log(`items`);
         console.log(this.items);
