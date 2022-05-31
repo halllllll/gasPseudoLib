@@ -3,18 +3,10 @@
     data: ()=>({
       searchWords: '',
       items: null,
-      tableHeader: [
-        // {"title": "本の名前"},
-        // {"author":"著者"},
-        // {"genre": "分類"},
-        // {"publisher": "出版社"},
-        // {"is_rented": "貸出状況"},
-        // {"image": "画像URL"},
-        "本の名前", "著者", "分類", "出版社", "貸出状況", "画像URL"
+      tableHeader: ["本の名前", "人名", "出版社", "分類"],
+      sheetHeader: [
+        "title", "author", "publisher", "genre", 
       ],
-      tableHeader2: [
-        "title", "genre", "author", "publisher", "is_rented", "image"
-      ]
     }),
     methods: {
       addItem: function(event){
@@ -27,8 +19,6 @@
         }else{
           sheetData = await this.searchData();
         }
-        // なぜかsearchWordsがないと言われた
-        // sheetData = await this.searchData();
         this.items = sheetData;
         console.log(`items`);
         console.log(this.items);
@@ -38,7 +28,7 @@
         google.script.run
           .withSuccessHandler((result) => resolve(result))
           .withFailureHandler((error) => resolve(error))
-          .getAllData();
+          .getAllData(this.sheetHeader);
         });
       },
       searchData: function(){
@@ -46,7 +36,7 @@
         google.script.run
           .withSuccessHandler((result) => resolve(result))
           .withFailureHandler((error) => resolve(error))
-          .search(this.tableHeader2, this.searchWords);
+          .search(this.sheetHeader, this.searchWords);
         });
       },
 

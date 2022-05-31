@@ -21,14 +21,14 @@ function include(filename) {
  * とりあえずsheetの全データを返す（Jsonとして返す）
  * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
-function getAllData(){
+function getAllData(header){
     const sheet = ss.getActiveSheet();
     const values = sheet.getDataRange().getValues();
-    const headerValue = values.splice(0, 1)[0];
+    values.shift(); // ヘッダーいらないよ
     return values.map((row)=>{
         let obj = {};
         row.map((item, index) => {
-          obj[String(headerValue[index])] = String(item);
+          obj[String(header[index])] = String(item);
         });
         return obj;
       });
@@ -40,14 +40,15 @@ function getAllData(){
  * @returns 
  */
 function search(header, words){
-  // 配列だとどうやってうけとるんじゃろか
-  console.log(`header: ${header} type: ${typeof header} length: ${header.length}`);
-
   // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた
-  console.log(`words: ${words}`);
+  // 配列も同じ
+  const searchWords = `(${word.trim().replaceAll(/(　| |\\|\|)+/g, " ").split(" ").join("|")})`;
+  console.log(`search target words: ${searchWords}`);
   const sheet = ss.getActiveSheet();
   const values = sheet.getDataRange().getValues();
-  // const headerValue = values.splice(0, 1)[0];
+  values.shift(); // ヘッダーいらないよ
+
+  
   return values.map((row)=>{
       let obj = {};
       row.map((item, index) => {
