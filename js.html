@@ -11,6 +11,9 @@
         // {"is_rented": "貸出状況"},
         // {"image": "画像URL"},
         "本の名前", "著者", "分類", "出版社", "貸出状況", "画像URL"
+      ],
+      tableHeader2: [
+        "title", "genre", "author", "publisher", "is_rented", "image"
       ]
     }),
     methods: {
@@ -43,7 +46,7 @@
         google.script.run
           .withSuccessHandler((result) => resolve(result))
           .withFailureHandler((error) => resolve(error))
-          .search(this.searchWords);
+          .search(this.tableHeader2, this.searchWords);
         });
       },
 

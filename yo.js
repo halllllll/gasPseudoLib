@@ -39,16 +39,19 @@ function getAllData(){
  * @param {string} words 
  * @returns 
  */
-function search(words){
-  // とくにjsonとか考えなくても文字列のまま取得できた
+function search(header, words){
+  // 配列だとどうやってうけとるんじゃろか
+  console.log(`header: ${header} type: ${typeof header} length: ${header.length}`);
+
+  // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた
   console.log(`words: ${words}`);
   const sheet = ss.getActiveSheet();
   const values = sheet.getDataRange().getValues();
-  const headerValue = values.splice(0, 1)[0];
+  // const headerValue = values.splice(0, 1)[0];
   return values.map((row)=>{
       let obj = {};
       row.map((item, index) => {
-        obj[String(headerValue[index])] = String(item);
+        obj[String(header[index])] = String(item);
       });
       return obj;
     });
