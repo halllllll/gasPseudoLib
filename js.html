@@ -2,6 +2,7 @@
   const app = Vue.createApp({
     data: ()=>({
       searchWords: "",
+      pageNum: 0,
       items: null,
       // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
       tableHeader: ["本の名前", "人名", "出版者", "分類"],
@@ -15,6 +16,7 @@
         console.log("CLICK")
       },
       loadData: async function(event){
+        // this.pageNum++;
         this.message = "けんさくちゅう..."
         let sheetData = null;
         sheetData = await this.searchData();
@@ -23,24 +25,14 @@
         console.log(`items`);
         console.log(this.items);
       },
-      getData: function(){
-        return new Promise((resolve, reject) => {
-        google.script.run
-          .withSuccessHandler((result) => resolve(result))
-          .withFailureHandler((error) => resolve(error))
-          .getAllData(this.sheetHeader);
-        });
-      },
       searchData: function(){
         return new Promise((resolve, reject) => {
         google.script.run
           .withSuccessHandler((result) => resolve(result))
           .withFailureHandler((error) => resolve(error))
-          .search(this.sheetHeader, this.searchWords);
+          .search(this.sheetHeader, this.searchWords, this.pageNum);
         });
       },
-
-
     },
   });
 
