@@ -10,30 +10,117 @@
         "title", "author", "publisher", "genre", 
       ],
       message: "",
+
+      // ページネーション用？ 初期値, 最初, 中間, 最後
+      // null, onFirstPage, onMidPage, onLastPage
+      paginateState: null,
     }),
     methods: {
       addItem: function(event){
         console.log("CLICK")
       },
-      loadData: async function(event){
-        // this.pageNum++;
-        this.message = "けんさくちゅう..."
-        let sheetData = null;
-        sheetData = await this.searchData();
-        this.message = "けんさくけっか！";
-        this.items = sheetData;
+      prePage: async function(){
+        console.log(`prev page`);
+        this.pageNum =  parseInt(Math.max(this.pageNum-1, 0));
+        const sheetData = await this.searchData();
+        this.items = sheetData.data;
         console.log(`items`);
         console.log(this.items);
+        console.log(`count: ${sheetData.resultNum}`);
+        console.log(`curpage: ${sheetData.curPage}`);
+        console.log(`maspage: ${sheetData.maxPage}`);
+
+        if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
+          this.paginateState = null;
+        }else if(parseInt(sheetData.curPage) === 1){
+          this.paginateState = "onFirstPage";         
+        }else if(parseInt(sheetData.maxPage) === parseInt(sheetData.curPage)){
+          this.paginateState = "onLastPage";
+        }else if(1 < parseInt(sheetData.curPage) && parseInt(sheetData.curPage) < parseInt(sheetData.maxPage)){
+          this.paginateState = "onMidPage"
+        }else{
+          console.log(`???`);
+        }
       },
+      nexPage: async function(){
+        console.log(`nex page`);
+        this.pageNum++;
+        let sheetData = null;
+        sheetData = await this.searchData();
+        this.items = sheetData.data;
+        console.log(`items`);
+        console.log(this.items);
+        console.log(`count: ${sheetData.resultNum}`);
+        console.log(`curpage: ${sheetData.curPage}`);
+        console.log(`maspage: ${sheetData.maxPage}`);
+
+        if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
+          this.paginateState = null;
+        }else if(parseInt(sheetData.curPage) === 1){
+          this.paginateState = "onFirstPage";         
+        }else if(parseInt(sheetData.maxPage) === parseInt(sheetData.curPage)){
+          this.paginateState = "onLastPage";
+        }else if(1 < parseInt(sheetData.curPage) && parseInt(sheetData.curPage) < parseInt(sheetData.maxPage)){
+          this.paginateState = "onMidPage"
+        }else{
+          console.log(`???`);
+        }
+      },
+      loadData: async function(event){
+        // 検索開始 = 1ページ目から表示
+        this.pageNum = 1;
+        this.paginateState = null;
+        const sheetData = await this.searchData();
+        this.items = sheetData.data;
+        console.log(`items`);
+        console.log(this.items);
+        console.log(`count: ${sheetData.resultNum}`);
+        console.log(`curpage: ${sheetData.curPage}`);
+        console.log(`maspage: ${sheetData.maxPage}`);
+
+        if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
+          this.paginateState = null;
+        }else if(parseInt(sheetData.curPage) === 1){
+          this.paginateState = "onFirstPage";         
+        }else if(parseInt(sheetData.maxPage) === parseInt(sheetData.curPage)){
+          this.paginateState = "onLastPage";
+        }else if(1 < parseInt(sheetData.curPage) && parseInt(sheetData.curPage) < parseInt(sheetData.maxPage)){
+          this.paginateState = "onMidPage"
+        }else{
+          console.log(`???`);
+        }
+      },
+
       searchData: function(){
+        this.message = "けんさくちゅう..."
         return new Promise((resolve, reject) => {
         google.script.run
-          .withSuccessHandler((result) => resolve(result))
-          .withFailureHandler((error) => resolve(error))
+          .withSuccessHandler((result) => {
+            this.message = "けんさくけっか！";
+            resolve(result)
+          })
+          .withFailureHandler((error) => {
+            console.log(error);
+            reject(error)
+          })
           .search(this.sheetHeader, this.searchWords, this.pageNum);
         });
       },
     },
+
+    // paginateState監視
+    // watch: {
+    //   paginateState: function(newVal, oldVal){
+    //     console.log(`paginateState: new=${newVal} old=${oldVal}`);
+    //   },
+    //   // pageNum: function(newVal, oldVal){
+    //   //   switch(this.pageNum){
+    //   //     case 0:
+    //   //       this.paginateState = null;
+    //   //     case 
+    //   //   }
+    //   // }
+    // },
   });
 
 
