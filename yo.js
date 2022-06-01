@@ -38,26 +38,51 @@ function search(header, words, page){
     if(words !== ""){
         const textFinder = titleRange.createTextFinder(searchWords).useRegularExpression(true);
         const targetRanges = textFinder.findAll();
-        return targetRanges.map((r)=>{
+        const curTargetRanges = targetRanges.slice((page-1)*limitNum, page*limitNum);
+        const data = curTargetRanges.map((r)=>{
             let obj = {};
             // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
             const rNum = r.getRowIndex()-1;
             Logger.log(`${rNum}: ${values[rNum]}`);
             values[rNum].map((item, index) => {
-            obj[String(header[index])] = String(item);
+                obj[String(header[index])] = String(item);
             });
             return obj;
         });
+        console.log(`all count: ${targetRanges.length}`);
+        console.log(`max page? ${Math.ceil(targetRanges.length/limitNum)}`);
+        const retObj = {
+            'data': data,
+            'resultNum': targetRanges.length,
+            'maxPage': Math.ceil(targetRanges.length/limitNum),
+            'curPage': page,
+            'countLimit': limitNum,
+        };
+        return retObj;
+        
     }else{        
         console.log("検索ワード空だったよ～");
         values.shift();
-        return values.map((row)=>{
+        // ページはフロント側で先にインクリメントしてた...
+        let curValues = values.slice((page-1)*limitNum, page*limitNum);
+        const data = curValues.map((row)=>{
             let obj = {};
             row.map((item, index) => {
               obj[String(header[index])] = String(item);
             });
             return obj;
         });
+        console.log(`all count: ${values.length}`);
+        console.log(`max page? ${Math.ceil(values.length/limitNum)}`);
+
+        const retObj = {
+            'data': data,
+            'resultNum': values.length,
+            'maxPage': Math.ceil(values.length/limitNum),
+            'curPage': page,
+            'countLimit': limitNum,
+        };
+        return retObj;
     }
 }
 
