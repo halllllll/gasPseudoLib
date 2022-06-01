@@ -1,4 +1,7 @@
 const ss = SpreadsheetApp.getActive();
+// const sheet = ss.getActiveSheet();
+const sheet = ss.getSheetByName("本番データ");
+
 function showThisURL() {
   console.log(ss.getUrl())
 }
@@ -19,17 +22,46 @@ function include(filename) {
 /**
  * Vueのgoogle.script.runから呼ばれる
  * とりあえずsheetの全データを返す（Jsonとして返す）
- * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
-function getAllData(){
-    const sheet = ss.getActiveSheet();
+function getAllData(header){
     const values = sheet.getDataRange().getValues();
-    const headerValue = values.splice(0, 1)[0];
+    values.shift(); // ヘッダーいらないよ
     return values.map((row)=>{
         let obj = {};
         row.map((item, index) => {
-          obj[String(headerValue[index])] = String(item);
+            obj[String(header[index])] = String(item);
         });
         return obj;
-      });
+    });
 }
+
+/**
+ * ワードが含まれる行を取得したい
+ * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
+ */
+function search(header, words){
+  // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
+  const searchWords = `(${words.trim().replaceAll(/(　| |\\|\|)+/g, " ").split(" ").join("|")})`;
+  console.log(`search target words: ${searchWords}`);
+  // 検索対象はとりあえずタイトルだけ
+  const titleRange = sheet.getRange(`A2:A`);
+  const values = sheet.getDataRange().getValues();
+  // 検索
+  const textFinder = titleRange.createTextFinder(searchWords).useRegularExpression(true);
+  let targetRanges = textFinder.findAll();
+  if(targetRanges.length === 0){
+    // なかったら全件が対象
+    targetRanges = titleRange;
+  }
+  return targetRanges.map((r)=>{
+      let obj = {};
+      // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
+      const rNum = r.getRowIndex()-1;
+      Logger.log(`${rNum}: ${values[rNum]}`);
+      values[rNum].map((item, index) => {
+        obj[String(header[index])] = String(item);
+      });
+      return obj;
+    });
+}
+

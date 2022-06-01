@@ -1,24 +1,24 @@
 <script>
   const app = Vue.createApp({
     data: ()=>({
-      searchWords: '',
+      searchWords: "",
       items: null,
-      tableHeader: [
-        // {"title": "本の名前"},
-        // {"author":"著者"},
-        // {"genre": "分類"},
-        // {"publisher": "出版社"},
-        // {"is_rented": "貸出状況"},
-        // {"image": "画像URL"},
-        "本の名前", "著者", "分類", "出版社", "貸出状況", "画像URL"
-      ]
+      // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
+      tableHeader: ["本の名前", "人名", "出版者", "分類"],
+      sheetHeader: [
+        "title", "author", "publisher", "genre", 
+      ],
+      message: "",
     }),
     methods: {
       addItem: function(event){
         console.log("CLICK")
       },
-      loadData: async function(){
-        const sheetData = await this.getData();
+      loadData: async function(event){
+        this.message = "けんさくちゅう..."
+        let sheetData = null;
+        sheetData = await this.searchData();
+        this.message = "けんさくけっか！";
         this.items = sheetData;
         console.log(`items`);
         console.log(this.items);
@@ -28,9 +28,19 @@
         google.script.run
           .withSuccessHandler((result) => resolve(result))
           .withFailureHandler((error) => resolve(error))
-          .getAllData();
-      });
+          .getAllData(this.sheetHeader);
+        });
       },
+      searchData: function(){
+        return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler((result) => resolve(result))
+          .withFailureHandler((error) => resolve(error))
+          .search(this.sheetHeader, this.searchWords);
+        });
+      },
+
+
     },
   });
 
