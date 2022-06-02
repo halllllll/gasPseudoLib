@@ -1,6 +1,7 @@
 const ss = SpreadsheetApp.getActive();
 // const sheet = ss.getActiveSheet();
-const sheet = ss.getSheetByName("本番データ");
+const DataSheet = ss.getSheetByName("本番データ");
+const GenreSheet = ss.getSheetByName("分類表");
 
 function showThisURL() {
   console.log(ss.getUrl())
@@ -21,15 +22,53 @@ function include(filename) {
 /**
  * 分類表をもとに変換
  */
-function mapGenreNum(){
-    const sheet = ss.getSheetByName("分類表");
-    if(sheet === null){
+function genGenreTable(){
+    if(GenreSheet === null){
         return;
     }
-    const value = sheet.getDataRange().getValues();
+    // 中間テーブル（こっちがインターフェース）
+    const midTable = new Map();
+    // 実テーブル
+    const table = new Map();
+    // めんどくさいのでヘッダーを含めてテーブル作る
+    const value = GenreSheet.getDataRange().getDisplayValues();
     for(let [idx, v] of value.entries()){
-      console.log(`${idx} ${v}`);
+        if(v.length!==3){
+            return new Error("invalid data of sheet `分類表`");
+        }
+        v = v.map(ele => (ele.trim()).toString());
+        table.set(v[0], v[1]);  // key, value. ひらがなは一旦無視
     }
+    // 「半角数が3つ並ぶ」にマッチ `g`オプションがないと最初のやつにマッチ
+    const pattern = /[0-9]{3}/i;
+
+    // 本番データから分類の部分の列だけとってきてみる
+    const sayQNumb = DataSheet.getRange(`D2:D`).getDisplayValues();
+    for(let [idx, v] of sayQNumb.entries()){
+        const content = v.toString().replaceAll(/\s/img, "");
+        if(content == null){
+            midTable.set(v.toString(), v.toString()); // 未登録
+            continue;
+        }
+        let result = content.match(pattern);
+        if(result == null){
+            midTable.set(v.toString(), v.toString()); // 未登録
+            continue;
+        }
+        result = result.toString();
+        if(result != null && table.has(result)){
+            midTable.set(result, table.get(result));
+        }else{
+            midTable.set(result, v.toString()); // 未登録
+        }
+    }
+
+    console.log(`mid table:`);
+    midTable.forEach((v, k)=>{
+        console.log(`--- key: ${k}, value: ${v}`);
+    });
+    console.log(`--------------end-----------------`);
+    return midTable;
 }
 
 /**
@@ -41,17 +80,34 @@ function mapGenreNum(){
  */
 function search(header, words, page){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
-    const searchWords = `(${words.trim().replaceAll(/(　| |\\|\|)+/g, " ").split(" ").join("|")})`;
+    const searchWords = `(${words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ").join("|")})`;
     console.log(`search target words: ${searchWords}`);
     // 分類分けのためにheaderにgenreを含ませる
     if(!header.includes("genre")){
         header.push("genre");
     }
-    // 分類分け、とりあえず3桁番号のみ
-    const genrePattern = /\d{3}/g;
+    // 分類分け　毎回とってくるのはおかしい　あとで考える
+    const genreTable = genGenreTable();
+    const setObjProperties = (tmpObj, index, item, header) =>{
+        if(String(header[index]) === "genre"){
+            let genre = item.replaceAll(/\s/img, "");
+            genre = genre.match(/[0-9]{3}/i);
+            if(genre != null){
+                // なぜか配列になってる regexのパターンでgは指定してないのだが
+                genre = genre.length >= 1 ? genre[0] : genre;
+                tmpObj["genre"] = genreTable.get(genre);
+            }else{
+                tmpObj["genre"] = `${String(genreTable.get(genre))} - 未登録(${String(item)}) `;
+            }
+        }else{
+            tmpObj[String(header[index])] = String(item);
+        }
+    };
+
+
     // 検索対象はとりあえずタイトルだけ
-    const titleRange = sheet.getRange(`A2:A`);
-    const values = sheet.getDataRange().getValues();
+    const titleRange = DataSheet.getRange(`A2:A`);
+    const values = DataSheet.getDataRange().getValues();
     // 1ページあたりの表示件数
     const limitNum = 50;
     // 返すオブジェクト
@@ -70,16 +126,7 @@ function search(header, words, page){
             Logger.log(`${rNum}: ${values[rNum]}`);
             let tmpObj = {};
             values[rNum].map((item, index) => {
-                // genreのときは専用に分類分けする
-                if(String(header[index]) === "genre"){
-                    let genre = String(item);
-                    console.log("分類あったよん");
-                    // テスト
-                    genre += `テストだよん`;
-                    tmpObj["genre"] = genre;
-                }else{
-                    tmpObj[String(header[index])] = String(item);
-                }
+                setObjProperties(tmpObj, index, item, header);
             });
             return tmpObj;
         });
@@ -94,11 +141,11 @@ function search(header, words, page){
         // ページはフロント側で先にインクリメントしてた...
         let curValues = values.slice((page-1)*limitNum, page*limitNum);
         const data = curValues.map((row)=>{
-            let obj = {};
+            let tmpObj = {};
             row.map((item, index) => {
-              obj[String(header[index])] = String(item);
+              setObjProperties(tmpObj, index, item, header);
             });
-            return obj;
+            return tmpObj;
         });
         console.log(`all count: ${values.length}`);
         console.log(`max page: ${Math.ceil(values.length/limitNum)}`);
