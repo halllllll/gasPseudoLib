@@ -97,7 +97,7 @@ function search(header, words, page){
                 genre = genre.length >= 1 ? genre[0] : genre;
                 tmpObj["genre"] = genreTable.get(genre);
             }else{
-                tmpObj["genre"] = `${String(genreTable.get(genre))} - 未登録(${String(item)}) `;
+                tmpObj["genre"] = `みとうろく(${String(item)}) `;
             }
         }else{
             tmpObj[String(header[index])] = String(item);
