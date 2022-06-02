@@ -3,13 +3,16 @@
 <head>
   <base target="_top">
   <meta charset="utf-8">
+  <!-- google fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic&display=swap" rel="stylesheet"> 
   <!-- tailwind -->
   <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
   <?!= include('css'); ?>
 </head>
 <body>
-    
-  <div id="app">
+  <div id="app" class="font-sans: 'BIZ UDPGothic'">
     <?!= include('header'); ?>
     <div class="container mx-auto px-8 py-4">
       <form v-on:submit.prevent class="w-full flex">
@@ -30,12 +33,12 @@
       <table class="w-full table-auto">
         <thead>
           <tr>
-            <th v-for="(h, idx) in tableHeader" v-bind:key="idx" class="px-6 py-3">{{h}}</th>
+            <th scope="col" v-for="(h, idx) in tableHeader" v-bind:key="idx" class="px-6 py-5">{{h}}</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(row, idx) in items" v-bind:key="idx" class="bg-gray-100 border-b border-gray-700 mx-4 my-8">
-            <td v-for="h in sheetHeader" class="border">{{row[h]}}</td>
+            <td v-for="h in sheetHeader" class="border px-3 py-2 whitespace-nowrap text-left">{{row[h]}}</td>
           </tr>
         </tbody>
       </table>
