@@ -1,15 +1,4 @@
 {
-<<<<<<< HEAD
-  "timeZone": "America/New_York",
-  "dependencies": {},
-  "exceptionLogging": "STACKDRIVER",
-  "runtimeVersion": "V8",
-  "webapp": {
-    "executeAs": "USER_DEPLOYING",
-    "access": "ANYONE_ANONYMOUS"
-  }
-}
-=======
   "timeZone": "Asia/Tokyo",
   "dependencies": {
     "enabledAdvancedServices": [
@@ -27,4 +16,3 @@
     "https://www.googleapis.com/auth/spreadsheets"
   ]
 }
->>>>>>> repairPush
