@@ -15,14 +15,23 @@
   <div id="app">
     <?!= include('header'); ?>
     <div class="container mx-auto px-8 py-4">
-      <form v-on:submit.prevent class="w-full flex">
-        <!-- <input type="text" v-model="newItem"> -->
+      <form class="w-full flex">
         <div class="flex-shrink-0 flex-1 px-2">
-          <input class="w-full bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-green-500" id="inline-searchWords" type="text" value="" placeholder="けんさくワード" v-model="searchWords">
+          <input class="w-full bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-green-500" id="inline-searchWords" type="text" placeholder="けんさくワード">
+        </div>
+        <div class="flex w-40 py-2">
+          <div class="flex justify-between">
+            <div class="form-check form-check-inline px-5">
+              <label class="form-check-label inline-block text-gray-800" for="orSearch"><input class="form-check-input form-check-input rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="inlineRadioOptions" id="orSearch" value="orSearchOption" checked>OR</label>
+            </div>
+            <div class="form-check form-check-inline">            
+              <label class="form-check-label inline-block text-gray-800" for="andSearch"><input class="form-check-input form-check-input rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="inlineRadioOptions" id="andSearch" value="andSearchOption">AND</label>
+            </div>
+          </div>
         </div>
         <div class="flex-shrink-0 flex-1 px-2">
-          <button v-on:click="loadData" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">けんさく！</button>
-       </div>
+          <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mx-8">けんさく！</button>
+        </div>
       </form>
       <pre>
         {{message}}
