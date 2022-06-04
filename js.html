@@ -3,13 +3,14 @@
     data: ()=>({
       searchWords: "",
       pageNum: 0,
+      message: "",
+      loading: false, 
       items: null,
       // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
       tableHeader: ["本の名前", "人名", "出版者", "分類"],
       sheetHeader: [
         "title", "author", "publisher", "genre", 
       ],
-      message: "",
 
       // ページネーション用？ 初期値, 最初, 中間, 最後
       // null, onFirstPage, onMidPage, onLastPage
@@ -19,11 +20,7 @@
       addItem: function(event){
         console.log("CLICK")
       },
-      prePage: async function(){
-        console.log(`prev page`);
-        this.pageNum =  parseInt(Math.max(this.pageNum-1, 0));
-        const sheetData = await this.searchData();
-        this.items = sheetData.data;
+      updatePageState: function(sheetData){
         console.log(`items`);
         console.log(this.items);
         console.log(`count: ${sheetData.resultNum}`);
@@ -42,29 +39,19 @@
           console.log(`???`);
         }
       },
+      prePage: async function(){
+        console.log(`prev page`);
+        this.pageNum =  parseInt(Math.max(this.pageNum-1, 0));
+        const sheetData = await this.searchData();
+        this.items = sheetData.data;
+        this.updatePageState(sheetData);
+      },
       nexPage: async function(){
         console.log(`nex page`);
         this.pageNum++;
-        let sheetData = null;
-        sheetData = await this.searchData();
+        const sheetData = await this.searchData();
         this.items = sheetData.data;
-        console.log(`items`);
-        console.log(this.items);
-        console.log(`count: ${sheetData.resultNum}`);
-        console.log(`curpage: ${sheetData.curPage}`);
-        console.log(`maspage: ${sheetData.maxPage}`);
-
-        if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
-          this.paginateState = null;
-        }else if(parseInt(sheetData.curPage) === 1){
-          this.paginateState = "onFirstPage";         
-        }else if(parseInt(sheetData.maxPage) === parseInt(sheetData.curPage)){
-          this.paginateState = "onLastPage";
-        }else if(1 < parseInt(sheetData.curPage) && parseInt(sheetData.curPage) < parseInt(sheetData.maxPage)){
-          this.paginateState = "onMidPage"
-        }else{
-          console.log(`???`);
-        }
+        this.updatePageState(sheetData);
       },
       loadData: async function(event){
         // 検索開始 = 1ページ目から表示
@@ -72,36 +59,22 @@
         this.paginateState = null;
         const sheetData = await this.searchData();
         this.items = sheetData.data;
-        console.log(`items`);
-        console.log(this.items);
-        console.log(`count: ${sheetData.resultNum}`);
-        console.log(`curpage: ${sheetData.curPage}`);
-        console.log(`maspage: ${sheetData.maxPage}`);
-
-        if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
-          this.paginateState = null;
-        }else if(parseInt(sheetData.curPage) === 1){
-          this.paginateState = "onFirstPage";         
-        }else if(parseInt(sheetData.maxPage) === parseInt(sheetData.curPage)){
-          this.paginateState = "onLastPage";
-        }else if(1 < parseInt(sheetData.curPage) && parseInt(sheetData.curPage) < parseInt(sheetData.maxPage)){
-          this.paginateState = "onMidPage"
-        }else{
-          console.log(`???`);
-        }
+        this.updatePageState(sheetData);
       },
 
       searchData: function(){
-        this.message = "けんさくちゅう..."
+        this.message = "けんさくちゅう...";
+        this.loading = true;
         return new Promise((resolve, reject) => {
         google.script.run
           .withSuccessHandler((result) => {
             this.message = "けんさくけっか！";
-            resolve(result)
+            this.loading = false;
+            resolve(result);
           })
           .withFailureHandler((error) => {
             console.log(error);
-            reject(error)
+            reject(error);
           })
           .search(this.sheetHeader, this.searchWords, this.pageNum);
         });
