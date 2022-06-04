@@ -15,29 +15,11 @@
   <div id="app" v-cloak>
     <?!= include('header'); ?>
     <div class="container mx-auto px-8 py-4">
-      <form v-on:submit.prevent class="w-full flex">
-        <!-- 入力フォーム -->
-        <div class="flex-shrink-0 flex-1 px-2">
-          <input class="w-full bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-green-500" id="inline-searchWords" type="text" placeholder="けんさくワード" v-model="searchWords">
-        </div>
-        <!-- AND / OR -->
-        <div class="flex w-40 py-2">
-          <div class="flex justify-between">
-            <div class="form-check form-check-inline px-5">
-              <label class="form-check-label inline-block text-gray-800" for="orSearch"><input class="form-check-input form-check-input rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="inlineRadioOptions" id="orSearch" value="orSearchOption" checked>OR</label>
-            </div>
-            <div class="form-check form-check-inline">            
-              <label class="form-check-label inline-block text-gray-800" for="andSearch"><input class="form-check-input form-check-input rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="inlineRadioOptions" id="andSearch" value="andSearchOption">AND</label>
-            </div>
-          </div>
-        </div>
-        <!-- genre filtering -->
 
-        <!-- GO! -->
-        <div class="flex-shrink-0 flex-1 px-2">
-          <button v-on:click="loadData" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mx-8">けんさく！</button>
-        </div>
-      </form>
+      <!-- 入力フォーム -->
+      <?!= include('seachForm'); ?>
+
+      <!-- message -->
       <div class="flex">
         <p class="inline-flex items-center">
           {{message}}
@@ -49,7 +31,12 @@
           </span>
         </p>
       </div>
+
+      <!-- ページネーション -->
+      <?!= include('pagination'); ?>
+      
     </div>
+
     <!-- テーブルのヘッダーどこでどうしようか迷ったがhtml側にハードコーディングといくぜ -->
     <div class="container mx-auto px-8">
       <table class="w-full table-auto">
@@ -66,22 +53,8 @@
       </table>
     </div>
 
-    <!-- ここにページネーションが入る とりあえずailwindのサンプルからベタ書き -->
-    <template v-if="paginateState !== null">
-      <div class="py-10 flex justify-center">
-        <nav aria-label="Page navigation">
-          <ul class="flex list-style-none space-x-8">
-            <li v-if="paginateState !== 'onFirstPage'" class="prev">
-              <button v-on:click="prePage" class="border-2 border-blue-400 hover:bg-gray-300 text-blue font-bold py-2 px-10 rounded-full transition duration-150 ease-in-out"><span aria-hidden="true">&laquo;</span>もどる</button>
-            </li>
-            <li v-if="paginateState !== 'onLastPage'" class="nex">
-              <button v-on:click="nexPage" class="border-2 border-blue-400 hover:bg-gray-300 text-blue font-bold py-2 px-10 rounded-full transition duration-150 ease-in-out"><span aria-hidden="true">&raquo;</span>すすむ</button>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </template>
-
+    <!-- ページネーション -->
+    <?!= include('pagination'); ?>
   
     <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4" role="alert">
       <p class="mx-auto m-8 px-5">以下はただのデバッグ用なので（GASだとめちゃくちゃしんどい）気にしないでください</p>
