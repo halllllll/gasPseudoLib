@@ -3,13 +3,14 @@
     data: ()=>({
       searchWords: "",
       pageNum: 0,
+      message: "",
+      loading: false, 
       items: null,
       // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
       tableHeader: ["本の名前", "人名", "出版者", "分類"],
       sheetHeader: [
         "title", "author", "publisher", "genre", 
       ],
-      message: "",
 
       // ページネーション用？ 初期値, 最初, 中間, 最後
       // null, onFirstPage, onMidPage, onLastPage
@@ -92,16 +93,18 @@
       },
 
       searchData: function(){
-        this.message = "けんさくちゅう..."
+        this.message = "けんさくちゅう...";
+        this.loading = true;
         return new Promise((resolve, reject) => {
         google.script.run
           .withSuccessHandler((result) => {
             this.message = "けんさくけっか！";
-            resolve(result)
+            this.loading = false;
+            resolve(result);
           })
           .withFailureHandler((error) => {
             console.log(error);
-            reject(error)
+            reject(error);
           })
           .search(this.sheetHeader, this.searchWords, this.pageNum);
         });
