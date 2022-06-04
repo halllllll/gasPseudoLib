@@ -6,6 +6,7 @@
       message: "",
       loading: false, 
       items: null,
+      andOrOption: "OR", // html側でchecked入れててもデフォルトは空文字らしいので
       // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
       tableHeader: ["本の名前", "人名", "出版者", "分類"],
       sheetHeader: [
@@ -76,7 +77,7 @@
             console.log(error);
             reject(error);
           })
-          .search(this.sheetHeader, this.searchWords, this.pageNum);
+          .search(this.sheetHeader, this.searchWords, this.pageNum, this.andOrOption);
         });
       },
     },

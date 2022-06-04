@@ -6,10 +6,10 @@
     <div class="flex w-40 py-2">
       <div class="flex justify-between">
         <div class="form-check form-check-inline px-5">
-          <label class="form-check-label inline-block text-gray-800" for="orSearch"><input class="form-check-input form-check-input rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="inlineRadioOptions" id="orSearch" value="orSearchOption" checked>OR</label>
+          <label class="form-check-label inline-block text-gray-800" for="orSearch"><input class="form-check-input form-check-input rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="orOption" id="orSearch" value="OR" v-model="andOrOption" checked>OR</label>
         </div>
         <div class="form-check form-check-inline">            
-          <label class="form-check-label inline-block text-gray-800" for="andSearch"><input class="form-check-input form-check-input rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="inlineRadioOptions" id="andSearch" value="andSearchOption">AND</label>
+          <label class="form-check-label inline-block text-gray-800" for="andSearch"><input class="form-check-input form-check-input rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="andOption" id="andSearch" value="AND" v-model="andOrOption">AND</label>
         </div>
       </div>
     </div>

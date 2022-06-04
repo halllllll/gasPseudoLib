@@ -78,9 +78,20 @@ function genGenreTable(){
  * Vueのgoogle.script.runから呼ばれる
  * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
-function search(header, words, page){
+function search(header, words, page, option){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
-    const searchWords = `(${words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ").join("|")})`;
+    let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
+    switch(option){
+        case "OR":
+            searchWords = `(${searchWords.join("|")})`;
+            break;
+        case "AND":
+            searchWords = "^" + searchWords.map(word => `(?=.*${word})`).join("");
+            break;
+        default:
+            console.log(`why option besides or/and ?`);
+    }
+    
     console.log(`search target words: ${searchWords}`);
     // 分類分けのためにheaderにgenreを含ませる
     if(!header.includes("genre")){
