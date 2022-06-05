@@ -144,6 +144,7 @@ function search(header, words, page, option){
     }
     
     console.log(`search target words: ${searchWords}`);
+    
     // 分類分けのためにheaderにgenreを含ませる
     if(!header.includes("genre")){
         header.push("genre");
