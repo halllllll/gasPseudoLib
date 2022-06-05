@@ -81,6 +81,21 @@
         });
       },
     },
+    created: function(){
+      // apps script側でテーブルのやつ叩いとく
+      google.script.run
+          .withSuccessHandler((result) => {
+            console.log(`was table created?`);
+            console.log(result);
+            // resolve(result);
+          })
+          .withFailureHandler((error) => {
+            console.log(`omg some error occured when creating table...`);
+            console.log(error);
+            reject(error);
+          })
+          .genGenreTable();
+    },
   });
 
 

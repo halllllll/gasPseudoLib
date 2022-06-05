@@ -3,6 +3,49 @@ const ss = SpreadsheetApp.getActive();
 const DataSheet = ss.getSheetByName("本番データ");
 const GenreSheet = ss.getSheetByName("分類表");
 
+// vueのcreatedで初回だけ叩いて予めテーブル情報を生成しとく
+// ->失敗したのでキャッシュする方向に転換
+const caches = CacheService.getScriptCache();
+
+/**
+ * 時限で勝手にキャッシュする　cacheserviceの最大時間は6時間らしい
+ * これはdoGetから呼ばれ、毎回チェックして抜ける
+ */
+function setTriggerForCache(){
+    const triggerName = "setTriggerForCache";
+
+    // チェック
+    if(caches.get(triggerName) != null){
+        console.log(`not yet expireing time`);
+        return;
+    }
+    console.log(`expired(may be)`);
+    // triggerの発火タイミング
+    // cacheの上限が6時間だけどチキってその半分ということにする(milliseconds)
+    const cacheResetInterval = 60*60*6*1000 / 2;
+    
+    // Map object
+    const genreTableMap = genGenreTable();
+    const genreTableObj = {
+        triggerName: "生きとるよ",
+    };
+    genreTableMap.forEach((v, k)=>{
+        genreTableObj[k] = v;
+    });
+    
+    caches.putAll(genreTableObj, 60*60*6); // up to limit is 6 hours(21600 sec)
+
+    const triggers = ScriptApp.getProjectTriggers();
+    for(let trigger of triggers){
+        if(trigger.getHandlerFunction() === triggerName){
+          ScriptApp.deleteTrigger(trigger);
+        }
+    }
+    // 自分自身にトリガーをセット
+    ScriptApp.newTrigger(triggerName).timeBased().after(cacheResetInterval).create();
+}
+
+
 function showThisURL() {
   console.log(ss.getUrl())
 }
@@ -12,6 +55,14 @@ function doGet(){
     html.addMetaTag('viewport', 'width=device-width, initial-scale=1');
     html.setTitle("ほんのけんさく（たいけんばん）");
     html.setFaviconUrl("https://img.icons8.com/flat-round/344/26e07f/book.png");
+
+    const triggerName = "setTriggerForCache";
+    // チェック
+    if(caches.get(triggerName) == null){
+        console.log(`cache~~~`);
+        setTriggerForCache(); // 時限で値をキャッシュするやつ
+    }
+
     return html;
 }
 
@@ -97,8 +148,6 @@ function search(header, words, page, option){
     if(!header.includes("genre")){
         header.push("genre");
     }
-    // 分類分け　毎回とってくるのはおかしい　あとで考える
-    const genreTable = genGenreTable();
     const setObjProperties = (tmpObj, index, item, header) =>{
         if(String(header[index]) === "genre"){
             let genre = item.replaceAll(/\s/img, "");
@@ -106,7 +155,8 @@ function search(header, words, page, option){
             if(genre != null){
                 // なぜか配列になってる regexのパターンでgは指定してないのだが
                 genre = genre.length >= 1 ? genre[0] : genre;
-                tmpObj["genre"] = genreTable.get(genre);
+                // tmpObj["genre"] = genreTable.get(genre);
+                tmpObj["genre"] = caches.get(genre);
             }else{
                 tmpObj["genre"] = `みとうろく(${String(item)}) `;
             }
