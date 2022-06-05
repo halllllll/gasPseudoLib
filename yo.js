@@ -91,7 +91,8 @@ function genGenreTable(){
         table.set(v[0], v[1]);  // key, value. ひらがなは一旦無視
     }
     // 「半角数が3つ並ぶ」にマッチ `g`オプションがないと最初のやつにマッチ
-    const pattern = /[0-9]{3}/i;
+    // 先頭がEだと絵本らしい（これが一般的なのかは不明）
+    const pattern = /[0-9]{3}|^E/i;
 
     // 本番データから分類の部分の列だけとってきてみる
     const sayQNumb = DataSheet.getRange(`D2:D`).getDisplayValues();
@@ -152,7 +153,8 @@ function search(header, words, page, option){
     const setObjProperties = (tmpObj, index, item, header) =>{
         if(String(header[index]) === "genre"){
             let genre = item.replaceAll(/\s/img, "");
-            genre = genre.match(/[0-9]{3}/i);
+            // 先頭がEだと絵本らしい（これが一般的なのかは不明）
+            genre = genre.match(/[0-9]{3}|^E/i);
             if(genre != null){
                 // なぜか配列になってる regexのパターンでgは指定してないのだが
                 genre = genre.length >= 1 ? genre[0] : genre;
