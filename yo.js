@@ -74,7 +74,7 @@ function genGenreTable(){
 /**
  * ワードが含まれる行を取得したい
  * 検索ワードが空の場合は全部返す
- * 1ページあたり50件とする
+ * 1ページあたり50件とする(limitNum)
  * Vueのgoogle.script.runから呼ばれる
  * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
