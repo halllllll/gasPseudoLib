@@ -3,13 +3,21 @@
     data: ()=>({
       searchWords: "",
       pageNum: 0,
+      message: "",
+      loading: false, 
       items: null,
+      andOrOption: "OR", // html側でchecked入れててもデフォルトは空文字らしいので
       // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
-      tableHeader: ["本の名前", "人名", "出版者", "分類"],
+      tableHeader: [
+        {"name": "本の名前", "thWidth": "w-2/5"},
+        {"name": "人名", "thWidth": "w-1/4"},
+        {"name":"出版者", "thWidth": "w-1/5"},
+        {"name": "分類", "thWidth": "w-1/6"},
+      ],
+      tableHeaderWidths: ["w-2/5", "w-1/4", "w-1/5", "w-1/6"],
       sheetHeader: [
         "title", "author", "publisher", "genre", 
       ],
-      message: "",
 
       // ページネーション用？ 初期値, 最初, 中間, 最後
       // null, onFirstPage, onMidPage, onLastPage
@@ -19,11 +27,7 @@
       addItem: function(event){
         console.log("CLICK")
       },
-      prePage: async function(){
-        console.log(`prev page`);
-        this.pageNum =  parseInt(Math.max(this.pageNum-1, 0));
-        const sheetData = await this.searchData();
-        this.items = sheetData.data;
+      updatePageState: function(sheetData){
         console.log(`items`);
         console.log(this.items);
         console.log(`count: ${sheetData.resultNum}`);
@@ -42,29 +46,19 @@
           console.log(`???`);
         }
       },
+      prePage: async function(){
+        console.log(`prev page`);
+        this.pageNum =  parseInt(Math.max(this.pageNum-1, 0));
+        const sheetData = await this.searchData();
+        this.items = sheetData.data;
+        this.updatePageState(sheetData);
+      },
       nexPage: async function(){
         console.log(`nex page`);
         this.pageNum++;
-        let sheetData = null;
-        sheetData = await this.searchData();
+        const sheetData = await this.searchData();
         this.items = sheetData.data;
-        console.log(`items`);
-        console.log(this.items);
-        console.log(`count: ${sheetData.resultNum}`);
-        console.log(`curpage: ${sheetData.curPage}`);
-        console.log(`maspage: ${sheetData.maxPage}`);
-
-        if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
-          this.paginateState = null;
-        }else if(parseInt(sheetData.curPage) === 1){
-          this.paginateState = "onFirstPage";         
-        }else if(parseInt(sheetData.maxPage) === parseInt(sheetData.curPage)){
-          this.paginateState = "onLastPage";
-        }else if(1 < parseInt(sheetData.curPage) && parseInt(sheetData.curPage) < parseInt(sheetData.maxPage)){
-          this.paginateState = "onMidPage"
-        }else{
-          console.log(`???`);
-        }
+        this.updatePageState(sheetData);
       },
       loadData: async function(event){
         // 検索開始 = 1ページ目から表示
@@ -72,55 +66,42 @@
         this.paginateState = null;
         const sheetData = await this.searchData();
         this.items = sheetData.data;
-        console.log(`items`);
-        console.log(this.items);
-        console.log(`count: ${sheetData.resultNum}`);
-        console.log(`curpage: ${sheetData.curPage}`);
-        console.log(`maspage: ${sheetData.maxPage}`);
-
-        if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
-          this.paginateState = null;
-        }else if(parseInt(sheetData.curPage) === 1){
-          this.paginateState = "onFirstPage";         
-        }else if(parseInt(sheetData.maxPage) === parseInt(sheetData.curPage)){
-          this.paginateState = "onLastPage";
-        }else if(1 < parseInt(sheetData.curPage) && parseInt(sheetData.curPage) < parseInt(sheetData.maxPage)){
-          this.paginateState = "onMidPage"
-        }else{
-          console.log(`???`);
-        }
+        this.updatePageState(sheetData);
       },
 
       searchData: function(){
-        this.message = "けんさくちゅう..."
+        this.message = "けんさくちゅう...";
+        this.loading = true;
         return new Promise((resolve, reject) => {
         google.script.run
           .withSuccessHandler((result) => {
             this.message = "けんさくけっか！";
-            resolve(result)
+            this.loading = false;
+            resolve(result);
           })
           .withFailureHandler((error) => {
             console.log(error);
-            reject(error)
+            reject(error);
           })
-          .search(this.sheetHeader, this.searchWords, this.pageNum);
+          .search(this.sheetHeader, this.searchWords, this.pageNum, this.andOrOption);
         });
       },
     },
-
-    // paginateState監視
-    // watch: {
-    //   paginateState: function(newVal, oldVal){
-    //     console.log(`paginateState: new=${newVal} old=${oldVal}`);
-    //   },
-    //   // pageNum: function(newVal, oldVal){
-    //   //   switch(this.pageNum){
-    //   //     case 0:
-    //   //       this.paginateState = null;
-    //   //     case 
-    //   //   }
-    //   // }
-    // },
+    created: function(){
+      // apps script側でテーブルのやつ叩いとく
+      google.script.run
+          .withSuccessHandler((result) => {
+            console.log(`was table created?`);
+            console.log(result);
+            // resolve(result);
+          })
+          .withFailureHandler((error) => {
+            console.log(`omg some error occured when creating table...`);
+            console.log(error);
+            reject(error);
+          })
+          .genGenreTable();
+    },
   });
 
 
