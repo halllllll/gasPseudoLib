@@ -28,7 +28,7 @@ function convertTitleToKana_(){
     // 排他的フラグでブロック
     const execUser = properties.getProperty(CONVERTING_KANA_FLAG);
     if(execUser !== null){
-      SpreadsheetApp.getUi().alert(`${execUser}が使用中です`);
+      // SpreadsheetApp.getUi().alert(`${execUser}が使用中です`); 時間主導トリガーだと呼び出せずエラーになる
       console.log(`${execUser}が使用中です`);　// uiで出したいね
       return;
     }else{
