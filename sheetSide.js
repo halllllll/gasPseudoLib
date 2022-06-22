@@ -21,10 +21,20 @@ function genMenu_(){
  * ISBN列をもとにして本のデータを取得
  * データから読み方を取得
  * 不要なfetchはしないようにしたい
- * 最終的にはtriggerにする
  * 連続押下を防ぐためのフラグを用意したい（あとでやる）
  */
 function convertTitleToKana_(){
+    const properties = PropertiesService.getScriptProperties();
+    // 排他的フラグでブロック
+    const execUser = properties.getProperty(CONVERTING_KANA_FLAG);
+    if(execUser !== null){
+      SpreadsheetApp.getUi().alert(`${execUser}が使用中です`);
+      console.log(`${execUser}が使用中です`);　// uiで出したいね
+      return;
+    }else{
+      properties.setProperty(CONVERTING_KANA_FLAG, Session.getActiveUser().getEmail());
+    }
+
     // 実行時間計測用
     const startTime = new Date();
     const limitMin = 1;
@@ -32,8 +42,9 @@ function convertTitleToKana_(){
     const isbnVal = DataSheet.getRange(`${COL_ISBN}2:${COL_ISBN}`).getDisplayValues();
     // テストでタイトル取得
     const titleVal = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`).getDisplayValues();
+    // 無駄なfetchを防ぐため、すでに入力済のセルは無視する
+    const kanaVal = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`).getDisplayValues();
     const triggers = ScriptApp.getProjectTriggers();
-    const properties = PropertiesService.getScriptProperties();
 
     for(let trigger of triggers){
         if(trigger.getHandlerFunction() === "convertTitleToKana_"){
@@ -59,18 +70,17 @@ function convertTitleToKana_(){
             taskIdx = i-1;
             console.log(`range start from: ${startIdx}, end ${taskIdx}`);
             properties.setProperty("taskIdx", taskIdx);
-            const range = DataSheet.getRange(`${COL_KANATITLE}${startIdx}:${COL_KANATITLE}${taskIdx}`); 
+            const range = DataSheet.getRange(`${COL_KANATITLE}${startIdx+2}:${COL_KANATITLE}${taskIdx+2}`); 
             console.log(`so, range height: ${range.getHeight()}`);
             console.log(`and, result length: ${result.length}`);
             range.setValues(result);
             const nextTrigger = ScriptApp.newTrigger("convertTitleToKana_").timeBased().after(30000).create(); // 30秒後
-            console.log(`next loop will start 30秒後?`);
             return;
         }
-
         // ここから取得
         const curIsbn = isbnVal[i][0];
-        if(curIsbn === ""){
+        const curKana = kanaVal[i][0]; // 不要なfetchを防ぐためすでに入力済のかなタイトルは無視
+        if(curIsbn === "" || curKana !== ""){
             result.push([""]);
             continue;
         }
@@ -89,6 +99,7 @@ function convertTitleToKana_(){
         result.push([kanaToHira_(kanaTitle)]);
     }
     properties.deleteProperty("taskIdx");
+    properties.deleteProperty(CONVERTING_KANA_FLAG);
     console.log("おわったよ～");
 }
 
