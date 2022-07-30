@@ -45,7 +45,7 @@
             <th scope="col" v-for="(h, idx) in tableHeader" v-bind:key="h.name" class="px-6 py-5" v-bind:class="h.thWidth">{{h.name}}</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="mb-30">
           <tr v-for="(row, idx) in items" v-bind:key="idx" class="bg-gray-100 border-b border-gray-700 mx-4 my-8">
             <td v-for="h in sheetHeader" class="border px-3 py-2 whitespace-nowrap text-left">{{row[h]}}</td>
           </tr>
@@ -56,6 +56,9 @@
     <!-- ページネーション -->
     <?!= include('pagination'); ?>
   
+    <!-- footer -->
+    <?!= include('footer'); ?>
+
     <!-- テスト用だよ <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4" role="alert">
       <p class="mx-auto m-8 px-5">以下はただのデバッグ用なので（GASだとめちゃくちゃしんどい）気にしないでください</p>
     </div>
