@@ -34,7 +34,7 @@ function convertTitleToKanaByOpenBD_(){
     
     if(execUser !== null){
       // SpreadsheetApp.getUi().alert(`${execUser}が使用中です`); 時間主導トリガーだと呼び出せずエラーになる
-      console.log(`${execUser}が使用中です`);　// uiで出したいね
+      SpreadsheetApp.getUi().alert(`${execUser}が使用中です`);
       // return;
     }else{
       properties.setProperty(CONVERTING_KANA_FLAG, Session.getActiveUser().getEmail());
