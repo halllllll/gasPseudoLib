@@ -15,6 +15,7 @@ function genMenu_(){
     const menu = ui.createMenu('蔵書検索用べんりボタン');
     menu.addItem("「本の名前」ひらがな変換(openbd)", "convertTitleToKanaByOpenBD_");
     menu.addItem("「本の名前」ひらがな変換(漢字を含まないタイトルを反映)", "mapKanaTitle_");
+    menu.addItem("「本の名前」ひらがな変換数を確認", "countKanaFilled_");
     menu.addToUi();
 }
 
@@ -103,7 +104,8 @@ function convertTitleToKanaByOpenBD_(){
     }
     properties.deleteProperty("taskIdx");
     properties.deleteProperty(CONVERTING_KANA_FLAG);
-    console.log("おわったよ～");
+    SpreadsheetApp.getUi().alert("openbdから反映する処理が完了しました");
+
 }
 
 /**
@@ -179,12 +181,13 @@ function getBookData_(isbn){
 /**
  * かな列、どんだけ埋まってないか知りたい
  */
-function rateKanaCol(){
+function countKanaFilled_(){
     const kanaVal = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`).getDisplayValues().flat();
+    const kanaHeader = DataSheet.getRange(`${COL_KANATITLE}1`).getDisplayValue();
     let count = 0;
     for(let k of kanaVal){
         if(k === "")continue;
         count++;
     }
-    Logger.log(`かな列の埋まり具合　${count} / ${kanaVal.length}`);
+    SpreadsheetApp.getUi().alert(`「${kanaHeader}」 記入数 \n${count} / ${kanaVal.length}`);
 }
