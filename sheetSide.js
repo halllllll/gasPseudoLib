@@ -13,17 +13,19 @@ function onOpen(){
 function genMenu_(){
     const ui = SpreadsheetApp.getUi();
     const menu = ui.createMenu('蔵書検索用べんりボタン');
-    menu.addItem("「本の名前」ひらがな変換", "convertTitleToKana_");
+    menu.addItem("「本の名前」ひらがな変換(openbd)", "convertTitleToKanaByOpenBD_");
+    menu.addItem("「本の名前」ひらがな変換(漢字を含まないタイトルを反映)", "mapKanaTitle_");
     menu.addToUi();
 }
 
 /**
  * ISBN列をもとにして本のデータを取得
+ * openbdを使用
  * データから読み方を取得
  * 不要なfetchはしないようにしたい
  * 連続押下を防ぐためのフラグを用意したい（あとでやる）
  */
-function convertTitleToKana_(){
+function convertTitleToKanaByOpenBD_(){
     const properties = PropertiesService.getScriptProperties();
     // 排他的フラグでブロック
     const execUser = properties.getProperty(CONVERTING_KANA_FLAG);
@@ -41,15 +43,15 @@ function convertTitleToKana_(){
     const startTime = new Date();
     const limitMin = 1;
     // ヘッダー無視　以降、ヘッダー亡き者として考える
-    const isbnVal = DataSheet.getRange(`${COL_ISBN}2:${COL_ISBN}`).getDisplayValues();
-    // テストでタイトル取得
-    const titleVal = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`).getDisplayValues();
+    const isbnVal = DataSheet.getRange(`${COL_ISBN}2:${COL_ISBN}`).getDisplayValues().flat();
+    // タイトル取得
+    const titleVal = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`).getDisplayValues().flat();
     // 無駄なfetchを防ぐため、すでに入力済のセルは無視する
-    const kanaVal = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`).getDisplayValues();
+    const kanaVal = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`).getDisplayValues().flat();
     const triggers = ScriptApp.getProjectTriggers();
 
     for(let trigger of triggers){
-        if(trigger.getHandlerFunction() === "convertTitleToKana_"){
+        if(trigger.getHandlerFunction() === "convertTitleToKanaByOpenBD_"){
           console.log(`--- DELETE SELF TRIGGER ---`);
           ScriptApp.deleteTrigger(trigger);
         };
@@ -76,28 +78,27 @@ function convertTitleToKana_(){
             console.log(`so, range height: ${range.getHeight()}`);
             console.log(`and, result length: ${result.length}`);
             range.setValues(result);
-            const nextTrigger = ScriptApp.newTrigger("convertTitleToKana_").timeBased().after(30000).create(); // 30秒後
+            const nextTrigger = ScriptApp.newTrigger("convertTitleToKanaByOpenBD_").timeBased().after(30000).create(); // 30秒後
             return;
         }
         // ここから取得
-        const curIsbn = isbnVal[i][0];
-        const curKana = kanaVal[i][0]; // 不要なfetchを防ぐためすでに入力済のかなタイトルは無視
+        const curIsbn = isbnVal[i];
+        const curKana = kanaVal[i]; // 不要なfetchを防ぐためすでに入力済のかなタイトルは無視
         if(curIsbn === "" || curKana !== ""){
-            result.push([""]);
+            result.push([curKana]);
             continue;
         }
         const data = getBookData_(curIsbn);
         const kanaTitle = data[0] !== null ? data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkey : "";
         console.log(`kanaTitle? ${kanaTitle}`);
-        // 4-931129-84-6でcollationkeyが存在しないパターンが発見されたので。全部あるわけじゃないんかい
+        // collationkeyが存在しないパターンがある
         if(kanaTitle === undefined){
             console.log(`${curIsbn}: openbd上でonix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkeyがみつかりませんでした`);
             // result.push("{{not find `collationkey`}}");
-            result.push([""]);
+            result.push([curKana]);
             continue;
         }
-        // const kanaTitle = "ニャー";
-        console.log(i, titleVal[i][0], curIsbn, kanaTitle, kanaToHira_(kanaTitle));
+        console.log(i, titleVal[i], curIsbn, kanaTitle, kanaToHira_(kanaTitle));
         result.push([kanaToHira_(kanaTitle)]);
     }
     properties.deleteProperty("taskIdx");
@@ -118,7 +119,45 @@ function t(){
 }
 
 /**
- * カタカナ->ひらがな
+ * もともと仮名とカナオンリーのタイトルだったらAPI叩く意味なさそうなので、
+ * そういうやつは単純にかな変換して転写するだけにする
+ * そんなに計算量と時間的にシビアではないので、列全体ではなく、都度APIを叩いてrangeごとに埋めるようにする
+ * (この関数による処理だとわかりやすくするため背景色を付与する)
+ */
+function mapKanaTitle_(){
+    const titleRange = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`);
+    const kanaRange = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`);
+    // タイトル取得
+    const titleVal = titleRange.getDisplayValues().flat();
+    // かな変換後のカラム 不要な変換を防ぐため、すでに埋まっている箇所は無視する
+    const kanaVal = kanaRange.getDisplayValues().flat();
+    for(let i=0; i<titleVal.length; i++){
+        if(kanaVal[i] !== "")continue;
+        if(!containsKanji_(titleVal[i]))continue; // 漢字が含まれていたらそのまま流用できない
+        // console.log(`「${titleVal[i]}」に漢字は含まれないのでそのまんま流用しちゃえ -> 「${kanaToHira_(titleVal[i])}」`);
+        const kanaRow = kanaRange.getCell(i+1, 1);
+        kanaRow.setBackground("#69fa99");
+        kanaRow.setValue(titleVal[i]);
+    }
+    SpreadsheetApp.getUi().alert("漢字が含まれないタイトルについて、「かな」列に流用する処理が完了しました");
+}
+
+/**
+ * 漢字以外
+ * 漢字(CJK)にマッチする正規表現 -> [\u4E00-\u9FFF\u3005-\u3007] (https://www.javadrive.jp/regex-basic/sample/index9.html)
+ * こういうことをするなら本当はウムラウトとか考えなければいけないが、今回の要件では無視する
+ * @param {String} text
+ * @return {boolean}
+ */
+function containsKanji_(text){
+    const pattern = /[\u4E00-\u9FFF\u3005-\u3007]/g;
+    return text.match(pattern) === null ? true : false;
+}
+
+
+/**
+ * カタカナを含む文字列 -> カタカナ部分は全部ひらがなに変換
+ * @param {String} kana 
  */
 function kanaToHira_(kana) {
     return kana.replace(/[\u30a1-\u30f6]/g, c => {
@@ -135,4 +174,17 @@ function getBookData_(isbn){
     const url = `https://api.openbd.jp/v1/get?isbn=${isbn}`;
     const res = UrlFetchApp.fetch(url);
     return JSON.parse(res.getContentText());
+}
+
+/**
+ * かな列、どんだけ埋まってないか知りたい
+ */
+function rateKanaCol(){
+    const kanaVal = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`).getDisplayValues().flat();
+    let count = 0;
+    for(let k of kanaVal){
+        if(k === "")continue;
+        count++;
+    }
+    Logger.log(`かな列の埋まり具合　${count} / ${kanaVal.length}`);
 }
