@@ -32,7 +32,7 @@ function convertTitleToKanaByOpenBD_(){
     const execUser = properties.getProperty(CONVERTING_KANA_FLAG);
     // 時間でのトリガーならブロックしない
     
-    if(execUser !== null){
+    if(execUser !== null || execUser !== Session.getActiveUser().getEmail()){
       // SpreadsheetApp.getUi().alert(`${execUser}が使用中です`); 時間主導トリガーだと呼び出せずエラーになる
       SpreadsheetApp.getUi().alert(`${execUser}が使用中です`);
       // return;
@@ -134,12 +134,12 @@ function mapKanaTitle_(){
     // かな変換後のカラム 不要な変換を防ぐため、すでに埋まっている箇所は無視する
     const kanaVal = kanaRange.getDisplayValues().flat();
     for(let i=0; i<titleVal.length; i++){
-        if(kanaVal[i] !== "")continue;
+        // if(kanaVal[i] !== "")continue;
         if(!containsKanji_(titleVal[i]))continue; // 漢字が含まれていたらそのまま流用できない
         // console.log(`「${titleVal[i]}」に漢字は含まれないのでそのまんま流用しちゃえ -> 「${kanaToHira_(titleVal[i])}」`);
         const kanaRow = kanaRange.getCell(i+1, 1);
         kanaRow.setBackground("#69fa99");
-        kanaRow.setValue(titleVal[i]);
+        kanaRow.setValue(kanaToHira_(titleVal[i]));
     }
     SpreadsheetApp.getUi().alert("漢字が含まれないタイトルについて、「かな」列に流用する処理が完了しました");
 }
