@@ -129,10 +129,10 @@ function genGenreTable(){
  * Vueのgoogle.script.runから呼ばれる
  * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
-function search(header, words, page, option){
+function search(header, words, page, andOrOption){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
     let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
-    switch(option){
+    switch(andOrOption){
         case "OR":
             searchWords = `(${searchWords.join("|")})`;
             break;
