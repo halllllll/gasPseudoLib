@@ -129,7 +129,7 @@ function genGenreTable(){
  * Vueのgoogle.script.runから呼ばれる
  * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
-function search(header, words, page, andOrOption){
+function search(header, words, page, andOrOption, includeAuthorName){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
     let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
     switch(andOrOption){
@@ -168,9 +168,13 @@ function search(header, words, page, andOrOption){
     };
 
 
-    // 検索対象はとりあえずタイトルだけ
+    // 検索対象 本のタイトル（オリジナル）
     const titleRange = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`);
+    // 検索対処 人名（オリジナル）
+    const authorRange = DataSheet.getRange(`${COL_AUTHOR}2:${COL_AUTHOR}`);
+
     const values = DataSheet.getDataRange().getValues();
+
     // 1ページあたりの表示件数
     const limitNum = 50;
     // 返すオブジェクト
@@ -180,10 +184,10 @@ function search(header, words, page, andOrOption){
     };
     // 検索
     if(words !== ""){
-        const textFinder = titleRange.createTextFinder(searchWords).useRegularExpression(true);
-        const targetRanges = textFinder.findAll();
-        const curTargetRanges = targetRanges.slice((page-1)*limitNum, page*limitNum);
-        const data = curTargetRanges.map((r)=>{
+        const titleFinder = titleRange.createTextFinder(searchWords).useRegularExpression(true);
+        const targetTitleRanges = titleFinder.findAll();
+        const curTargetTitleRanges = targetTitleRanges.slice((page-1)*limitNum, page*limitNum);
+        const data = curTargetTitleRanges.map((r)=>{
             // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
             const rNum = r.getRowIndex()-1;
             Logger.log(`${rNum}: ${values[rNum]}`);
@@ -193,17 +197,17 @@ function search(header, words, page, andOrOption){
             });
             return tmpObj;
         });
-        console.log(`all count: ${targetRanges.length}`);
-        console.log(`max page: ${Math.ceil(targetRanges.length/limitNum)}`);
+        console.log(`all count: ${targetTitleRanges.length}`);
+        console.log(`max page: ${Math.ceil(targetTitleRanges.length/limitNum)}`);
         retObj['data'] = data;
-        retObj['resultNum'] = targetRanges.length;
-        retObj['maxPage'] = Math.ceil(targetRanges.length/limitNum)
+        retObj['resultNum'] = targetTitleRanges.length;
+        retObj['maxPage'] = Math.ceil(targetTitleRanges.length/limitNum)
     }else{        
         console.log("検索ワード空だったよ～");
         values.shift();
         // ページはフロント側で先にインクリメントしてた...
-        let curValues = values.slice((page-1)*limitNum, page*limitNum);
-        const data = curValues.map((row)=>{
+        let curVal = values.slice((page-1)*limitNum, page*limitNum);
+        const data = curVal.map((row)=>{
             let tmpObj = {};
             row.map((item, index) => {
               setObjProperties(tmpObj, index, item, header);
