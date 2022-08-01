@@ -129,7 +129,7 @@ function genGenreTable(){
  * Vueのgoogle.script.runから呼ばれる
  * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
-function search(header, words, page, andOrOption, includeAuthorName){
+function search(header, words, page, andOrOption, includeAuthorName, experimental_hiraganaMode){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
     let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
     switch(andOrOption){
@@ -169,6 +169,7 @@ function search(header, words, page, andOrOption, includeAuthorName){
 
 
     // 検索対象 本のタイトル（オリジナル）
+    // Experimental Hiragana Mode
     const titleRange = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`);
     // 検索対処 人名（オリジナル）
     const authorRange = DataSheet.getRange(`${COL_AUTHOR}2:${COL_AUTHOR}`);
@@ -193,7 +194,7 @@ function search(header, words, page, andOrOption, includeAuthorName){
         const curTargetTitleRanges = targetTitleRanges.slice((page-1)*limitNum, page*limitNum);
         // 検索オプション（本のタイトル+人名など）を使ったときの重複排除とソート用
         const addedData = new Map();
-        
+
         //     const data = curTargetTitleRanges.map((r)=>{
         // // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
         //         const rNum = r.getRowIndex()-1;
@@ -212,7 +213,8 @@ function search(header, words, page, andOrOption, includeAuthorName){
             addedData.set(rNum, true);
             Logger.log(`${rNum}: ${values[rNum]}`);
             let tmpObj = {};
-            values[rNum].map((item, index) => {
+            // headerまでの長さに合わせる
+            values[rNum].slice(0, header.length).map((item, index) => {
                 setObjProperties(tmpObj, index, item, header);
             });
             pre.push(tmpObj);

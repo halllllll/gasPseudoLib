@@ -15,10 +15,11 @@ function myFunction() {
 function searchTest(){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
     const header = ["title", "author", "publisher", "genre"];
-    const words = `夏`;
+    const words = `なつ`;
     const page = 1;
     const andOrOption = "OR";
-    const includeAuthorName = true;
+    const includeAuthorName = false;
+    const experimental_hiraganaMode = true;
 
 
     let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
@@ -52,7 +53,10 @@ function searchTest(){
             }else{
                 tmpObj["genre"] = `みとうろく(${String(item)}) `;
             }
+
+
         }else{
+            console.log(`now: index = ${index}, ${header[index]}`);
             tmpObj[String(header[index])] = String(item);
         }
     };
@@ -60,6 +64,10 @@ function searchTest(){
 
     // 検索対象 本のタイトル（オリジナル）
     const titleRange = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`);
+
+    // 検索対象　ほんのタイトル（かな）
+    // const titleRange = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`);
+
     // 検索対処 人名（オリジナル）
     const authorRange = DataSheet.getRange(`${COL_AUTHOR}2:${COL_AUTHOR}`);
 
@@ -101,7 +109,8 @@ function searchTest(){
             addedData.set(rNum, true);
             Logger.log(`${rNum}: ${values[rNum]}`);
             let tmpObj = {};
-            values[rNum].map((item, index) => {
+            // headerまでの長さに合わせる
+            values[rNum].slice(0, header.length).map((item, index) => {
                 setObjProperties(tmpObj, index, item, header);
             });
             pre.push(tmpObj);
