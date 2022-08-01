@@ -185,6 +185,9 @@ function search(header, words, page, andOrOption, includeAuthorName){
     // 検索
     if(words !== ""){
         const titleFinder = titleRange.createTextFinder(searchWords).useRegularExpression(true);
+        // 人名での検索？
+        const targetAuthorRanges = includeAuthorName ? authorRange.createTextFinder(searchWords).useRegularExpression(true).findAll() : null;
+        // rangeって合成できるんだっけ
         const targetTitleRanges = titleFinder.findAll();
         const curTargetTitleRanges = targetTitleRanges.slice((page-1)*limitNum, page*limitNum);
         const data = curTargetTitleRanges.map((r)=>{
