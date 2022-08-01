@@ -191,16 +191,19 @@ function search(header, words, page, andOrOption, includeAuthorName){
         const targetTitleRanges = titleFinder.findAll();
         if(includeAuthorName)targetTitleRanges.push(...targetAuthorRanges);
         const curTargetTitleRanges = targetTitleRanges.slice((page-1)*limitNum, page*limitNum);
-    //     const data = curTargetTitleRanges.map((r)=>{
-    // // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
-    //         const rNum = r.getRowIndex()-1;
-    //         Logger.log(`${rNum}: ${values[rNum]}`);
-    //         let tmpObj = {};
-    //         values[rNum].map((item, index) => {
-    //             setObjProperties(tmpObj, index, item, header);
-    //         });
-    //         return tmpObj;
-    //     });
+        // 検索オプション（本のタイトル+人名など）を使ったときの重複排除とソート用
+        const addedData = new Map();
+        
+        //     const data = curTargetTitleRanges.map((r)=>{
+        // // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
+        //         const rNum = r.getRowIndex()-1;
+        //         Logger.log(`${rNum}: ${values[rNum]}`);
+        //         let tmpObj = {};
+        //         values[rNum].map((item, index) => {
+        //             setObjProperties(tmpObj, index, item, header);
+        //         });
+        //         return tmpObj;
+        //     });
         // 重複排除 ほんとはソートもしたいけどあとでやる....
         const data = curTargetTitleRanges.reduce((pre, _, rangeArrIdx, rangeArr) => {
             const curObj = rangeArr[rangeArrIdx];
