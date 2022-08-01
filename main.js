@@ -185,21 +185,36 @@ function search(header, words, page, andOrOption, includeAuthorName){
     // 検索
     if(words !== ""){
         const titleFinder = titleRange.createTextFinder(searchWords).useRegularExpression(true);
-        // 人名での検索？
-        const targetAuthorRanges = includeAuthorName ? authorRange.createTextFinder(searchWords).useRegularExpression(true).findAll() : null;
+        // 人名での検索 データに含まれる著作の区切りである「／」より手前で検索（「さく」とか「やく」とか「文」とか「著」とかが人名に含まれてることがある）
+        const targetAuthorRanges = includeAuthorName ? authorRange.createTextFinder(`${searchWords}.*(?=／).*`).useRegularExpression(true).findAll() : null;
         // rangeって合成できるんだっけ
         const targetTitleRanges = titleFinder.findAll();
+        if(includeAuthorName)targetTitleRanges.push(...targetAuthorRanges);
         const curTargetTitleRanges = targetTitleRanges.slice((page-1)*limitNum, page*limitNum);
-        const data = curTargetTitleRanges.map((r)=>{
-            // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
-            const rNum = r.getRowIndex()-1;
+    //     const data = curTargetTitleRanges.map((r)=>{
+    // // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
+    //         const rNum = r.getRowIndex()-1;
+    //         Logger.log(`${rNum}: ${values[rNum]}`);
+    //         let tmpObj = {};
+    //         values[rNum].map((item, index) => {
+    //             setObjProperties(tmpObj, index, item, header);
+    //         });
+    //         return tmpObj;
+    //     });
+        // 重複排除 ほんとはソートもしたいけどあとでやる....
+        const data = curTargetTitleRanges.reduce((pre, _, rangeArrIdx, rangeArr) => {
+            const curObj = rangeArr[rangeArrIdx];
+            const rNum = curObj.getRowIndex()-1;
+            if(addedData.has(rNum))return pre;
+            addedData.set(rNum, true);
             Logger.log(`${rNum}: ${values[rNum]}`);
             let tmpObj = {};
             values[rNum].map((item, index) => {
                 setObjProperties(tmpObj, index, item, header);
             });
-            return tmpObj;
-        });
+            pre.push(tmpObj);
+            return pre;
+        }, []);
         console.log(`all count: ${targetTitleRanges.length}`);
         console.log(`max page: ${Math.ceil(targetTitleRanges.length/limitNum)}`);
         retObj['data'] = data;
