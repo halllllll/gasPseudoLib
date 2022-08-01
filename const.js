@@ -1,6 +1,9 @@
 // タイトルの列
 const COL_TITLE = "A";
 
+// 著者の列
+const COL_AUTHOR = "B";
+
 // 分類の列
 const COL_GENRE = "D";
 

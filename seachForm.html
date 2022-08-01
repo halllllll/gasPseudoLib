@@ -1,6 +1,21 @@
 <form v-on:submit.prevent class="w-full flex flex-col md:flex-row">
-    <div class="flex-shrink-0 flex-1 px-2">
-      <input class="w-full bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-green-500" id="inline-searchWords" type="text" placeholder="けんさくワード" v-model="searchWords">
+    <div class="inline-flex flex-col">
+      <div class="flex-shrink-0 flex-1 px-2">
+        <input class="w-full bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-green-500" id="inline-searchWords" type="text" placeholder="けんさくワード" v-model="searchWords">
+      </div>
+      <!-- experimental_kana_include_search -->
+      <!-- <div class="inline-flex justify-end mt-2">
+        <label class="inline-flex items-center">
+          <input type="checkbox" class="w-6 h-6 rounded"  />
+          <span class="ml-2">ひらがなよみ </span>
+        </label>
+      </div> -->
+      <div class="inline-flex justify-end mt-2">
+        <label class="inline-flex items-center">
+          <input type="checkbox" class="w-6 h-6 rounded" v-model="includeAuthorName"/>
+          <span class="ml-2">人名をふくむ </span>
+        </label>
+      </div>
     </div>
     <!-- AND / OR -->
     <div class="flex w-40 py-2">
@@ -13,10 +28,12 @@
         </div>
       </div>
     </div>
-    <!-- genre filtering -->
+    
 
     <!-- GO! -->
     <div class="flex-shrink-0 flex-1 px-2">
       <button v-on:click="loadData" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mx-8">けんさく！</button>
     </div>
+    <!-- search options -->
+    
   </form>
