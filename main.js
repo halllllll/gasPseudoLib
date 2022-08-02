@@ -129,7 +129,7 @@ function genGenreTable(){
  * Vueのgoogle.script.runから呼ばれる
  * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
-function search(header, words, page, andOrOption, includeAuthorName){
+function search(header, words, page, andOrOption, includeAuthorName, experimental_hiraganaMode){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
     let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
     switch(andOrOption){
@@ -158,7 +158,7 @@ function search(header, words, page, andOrOption, includeAuthorName){
                 // なぜか配列になってる regexのパターンでgは指定してないのだが
                 genre = genre.length >= 1 ? genre[0] : genre;
                 // tmpObj["genre"] = genreTable.get(genre);
-                tmpObj["genre"] = caches.get(genre);
+                tmpObj["genre"] = `${genre}:${caches.get(genre)}`;
             }else{
                 tmpObj["genre"] = `みとうろく(${String(item)}) `;
             }
@@ -167,13 +167,24 @@ function search(header, words, page, andOrOption, includeAuthorName){
         }
     };
 
+    const titleColIdx = convertA1toColNum_(COL_TITLE);
+    const kanaTitleColIdx = convertA1toColNum_(COL_KANATITLE);
 
-    // 検索対象 本のタイトル（オリジナル）
-    const titleRange = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`);
-    // 検索対処 人名（オリジナル）
+    // 検索対象 本のタイトル（オリジナル or かな）
+    // experimental hiragana mode
+    const titleRange = experimental_hiraganaMode ? DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`) : DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`);
+
+    // 検索対象　人名（オリジナル）
     const authorRange = DataSheet.getRange(`${COL_AUTHOR}2:${COL_AUTHOR}`);
 
-    const values = DataSheet.getDataRange().getValues();
+    // ひらがなモード仮　しょうがないのでここでデータを入れ替える   オリジナルの名前の列とひらがなの名前の列を入れ替える
+
+    const values = experimental_hiraganaMode ? 
+          DataSheet.getDataRange().getValues().map(row=>{
+              [row[kanaTitleColIdx], row[titleColIdx]] = [row[titleColIdx], row[kanaTitleColIdx]];
+              return row;
+          }) : DataSheet.getDataRange().getValues();
+
 
     // 1ページあたりの表示件数
     const limitNum = 50;
@@ -187,13 +198,13 @@ function search(header, words, page, andOrOption, includeAuthorName){
         const titleFinder = titleRange.createTextFinder(searchWords).useRegularExpression(true);
         // 人名での検索 データに含まれる著作の区切りである「／」より手前で検索（「さく」とか「やく」とか「文」とか「著」とかが人名に含まれてることがある）
         const targetAuthorRanges = includeAuthorName ? authorRange.createTextFinder(`${searchWords}.*(?=／).*`).useRegularExpression(true).findAll() : null;
-        // rangeって合成できるんだっけ
+        // rangeって合成できるんだっけ 最初から登場順にできればいいのだが
         const targetTitleRanges = titleFinder.findAll();
         if(includeAuthorName)targetTitleRanges.push(...targetAuthorRanges);
         const curTargetTitleRanges = targetTitleRanges.slice((page-1)*limitNum, page*limitNum);
         // 検索オプション（本のタイトル+人名など）を使ったときの重複排除とソート用
         const addedData = new Map();
-        
+
         //     const data = curTargetTitleRanges.map((r)=>{
         // // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
         //         const rNum = r.getRowIndex()-1;
@@ -212,7 +223,8 @@ function search(header, words, page, andOrOption, includeAuthorName){
             addedData.set(rNum, true);
             Logger.log(`${rNum}: ${values[rNum]}`);
             let tmpObj = {};
-            values[rNum].map((item, index) => {
+            // headerまでの長さに合わせて余計なものを取らないようにする
+            values[rNum].slice(0, header.length).map((item, index) => {
                 setObjProperties(tmpObj, index, item, header);
             });
             pre.push(tmpObj);

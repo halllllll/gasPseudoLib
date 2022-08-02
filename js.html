@@ -8,6 +8,7 @@
       items: null,
       andOrOption: "OR", // html側でchecked入れててもデフォルトは空文字らしいので
       includeAuthorName: false,
+      hiraganaMode: false,
       // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
       tableHeader: [
         {"name": "本の名前", "thWidth": "w-2/5"},
@@ -30,7 +31,7 @@
         console.log(this.items);
         console.log(`count: ${sheetData.resultNum}`);
         console.log(`curpage: ${sheetData.curPage}`);
-        console.log(`maspage: ${sheetData.maxPage}`);
+        console.log(`maxpage: ${sheetData.maxPage}`);
 
         if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
           this.paginateState = null;
@@ -81,7 +82,7 @@
             console.log(error);
             reject(error);
           })
-          .search(this.sheetHeader, this.searchWords, this.pageNum, this.andOrOption, this.includeAuthorName);
+          .search(this.sheetHeader, this.searchWords, this.pageNum, this.andOrOption, this.includeAuthorName, this.hiraganaMode);
         });
       },
     },

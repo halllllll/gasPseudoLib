@@ -15,10 +15,11 @@ function myFunction() {
 function searchTest(){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
     const header = ["title", "author", "publisher", "genre"];
-    const words = `夏`;
+    const words = `なつ`;
     const page = 1;
     const andOrOption = "OR";
-    const includeAuthorName = true;
+    const includeAuthorName = false;
+    const experimental_hiraganaMode = true;
 
 
     let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
@@ -48,22 +49,37 @@ function searchTest(){
                 // なぜか配列になってる regexのパターンでgは指定してないのだが
                 genre = genre.length >= 1 ? genre[0] : genre;
                 // tmpObj["genre"] = genreTable.get(genre);
-                tmpObj["genre"] = caches.get(genre);
+                tmpObj["genre"] = `${genre}:${caches.get(genre)}`;
             }else{
                 tmpObj["genre"] = `みとうろく(${String(item)}) `;
             }
+
+
         }else{
             tmpObj[String(header[index])] = String(item);
         }
     };
 
+    // タイトルのカラムのA1表記を数値に
+    const titleColIdx = convertA1toColNum_(COL_TITLE);
+    const kanaTitleColIdx = convertA1toColNum_(COL_KANATITLE);
 
-    // 検索対象 本のタイトル（オリジナル）
-    const titleRange = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`);
-    // 検索対処 人名（オリジナル）
+
+
+    // 検索対象 本のタイトル（オリジナル or かな）
+    const titleRange = experimental_hiraganaMode ? DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`) : DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`);
+
+
+    // 検索対象 人名（オリジナル）
     const authorRange = DataSheet.getRange(`${COL_AUTHOR}2:${COL_AUTHOR}`);
 
-    const values = DataSheet.getDataRange().getValues();
+    // ひらがなモード仮　しょうがないのでここでデータを入れ替える   オリジナルの名前の列とひらがなの名前の列を入れ替える
+
+    const values = experimental_hiraganaMode ? 
+          DataSheet.getDataRange().getValues().map(row=>{
+              [row[kanaTitleColIdx], row[titleColIdx]] = [row[titleColIdx], row[kanaTitleColIdx]];
+              return row;
+          }) : DataSheet.getDataRange().getValues();
 
     // 1ページあたりの表示件数
     const limitNum = 50;
@@ -77,7 +93,7 @@ function searchTest(){
         const titleFinder = titleRange.createTextFinder(searchWords).useRegularExpression(true);
         // 人名での検索 データに含まれる著作の区切りである「／」より手前で検索（「さく」とか「やく」とか「文」とか「著」とかが人名に含まれてることがある）
         const targetAuthorRanges = includeAuthorName ? authorRange.createTextFinder(`${searchWords}.*(?=／).*`).useRegularExpression(true).findAll() : null;
-        // rangeって合成できるんだっけ
+        // rangeって合成できるんだっけ　最初から登場順にできればいいのだが 
         const targetTitleRanges = titleFinder.findAll();
         if(includeAuthorName)targetTitleRanges.push(...targetAuthorRanges);
         const curTargetTitleRanges = targetTitleRanges.slice((page-1)*limitNum, page*limitNum);
@@ -101,7 +117,8 @@ function searchTest(){
             addedData.set(rNum, true);
             Logger.log(`${rNum}: ${values[rNum]}`);
             let tmpObj = {};
-            values[rNum].map((item, index) => {
+            // headerまでの長さに合わせて余計なものを取らないようにする
+            values[rNum].slice(0, header.length).map((item, index) => {
                 setObjProperties(tmpObj, index, item, header);
             });
             pre.push(tmpObj);
@@ -137,7 +154,7 @@ function searchTest(){
     }else{
         retObj['successed'] = true;
     }
-  　for(let [val, key] of Object.entries(retObj)){
+  for(let [val, key] of Object.entries(retObj)){
       console.log(key, val);
   }
 }
