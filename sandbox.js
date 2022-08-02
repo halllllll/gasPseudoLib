@@ -149,7 +149,7 @@ function searchTest(){
     }else{
         retObj['successed'] = true;
     }
-  　for(let [val, key] of Object.entries(retObj)){
+  for(let [val, key] of Object.entries(retObj)){
       console.log(key, val);
   }
 }
