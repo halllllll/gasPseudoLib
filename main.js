@@ -158,7 +158,7 @@ function search(header, words, page, andOrOption, includeAuthorName, experimenta
                 // なぜか配列になってる regexのパターンでgは指定してないのだが
                 genre = genre.length >= 1 ? genre[0] : genre;
                 // tmpObj["genre"] = genreTable.get(genre);
-                tmpObj["genre"] = caches.get(genre);
+                tmpObj["genre"] = `${genre}:${caches.get(genre)}`;
             }else{
                 tmpObj["genre"] = `みとうろく(${String(item)}) `;
             }

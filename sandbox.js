@@ -49,7 +49,7 @@ function searchTest(){
                 // なぜか配列になってる regexのパターンでgは指定してないのだが
                 genre = genre.length >= 1 ? genre[0] : genre;
                 // tmpObj["genre"] = genreTable.get(genre);
-                tmpObj["genre"] = caches.get(genre);
+                tmpObj["genre"] = `${genre}:${caches.get(genre)}`;
             }else{
                 tmpObj["genre"] = `みとうろく(${String(item)}) `;
             }
@@ -59,6 +59,11 @@ function searchTest(){
             tmpObj[String(header[index])] = String(item);
         }
     };
+
+    // タイトルのカラムのA1表記を数値に
+    const titleColIdx = convertA1toColNum_(COL_TITLE);
+    const kanaTitleColIdx = convertA1toColNum_(COL_KANATITLE);
+
 
 
     // 検索対象 本のタイトル（オリジナル or かな）
