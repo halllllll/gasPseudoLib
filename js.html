@@ -21,6 +21,11 @@
         "title", "author", "publisher", "genre", 
       ],
 
+      // ヘッダーロゴ用のGoogleドライブ上の画像ファイルのID
+      fileId: "公開設定にした画像ファイルID",
+      // ヘッダーロゴ
+      logoImg: null,
+
       // ページネーション用？ 初期値, 最初, 中間, 最後
       // null, onFirstPage, onMidPage, onLastPage
       paginateState: null,
@@ -88,7 +93,7 @@
     },
     created: function(){
       // apps script側でテーブルのやつ叩いとく
-      google.script.run
+        google.script.run
           .withSuccessHandler((result) => {
             console.log(`was table created?`);
             console.log(result);
@@ -100,6 +105,19 @@
             reject(error);
           })
           .genGenreTable();
+
+        // logo image
+        google.script.run
+          .withSuccessHandler(result => {
+            console.log("success:");
+            this.logoImg = result;
+          })
+          .withFailureHandler(err =>{
+            console.error(err);
+            // alert(`ERROR!!!!\n${err}`);
+            this.logoImg = "https://4.bp.blogspot.com/-gUQWvlEhd90/WR_LT3yiH0I/AAAAAAABEfE/87r5mxWuTCYiufU3zurk5dhm-oaOyKS_QCLcB/s800/text_pop_koukai.png";
+          })
+          .getBase64UrlOnDriveImage(this.fileId);
     },
   });
 

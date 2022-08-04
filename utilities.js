@@ -39,15 +39,15 @@ function convertA1toColNum_(strCol){
       console.error("ドライブ上のファイルじゃないかも");
       throw new Error("is this file on Google Drive?");
     }
-    if(!accesibleDrive(file)){
+    if(!accesibleDrive_(file)){
       console.error("アクセスできないファイル permission not `ANYONE_WITH_LINK`");
       throw new Error("permission not `ANYONE_WITH_LINK`");
     }
-    if(!typeOfImage(file)){
+    if(!typeOfImage_(file)){
       console.error("not image file");
       throw new Error("not image file?");
     }
-    const ret = createImageBase64(file);
+    const ret = createImageBase64_(file);
     return ret;
   }catch(e){
     console.error(e);
@@ -58,13 +58,13 @@ function convertA1toColNum_(strCol){
 /**
  * Googleドライブに存在かつアクセスできる
  */
-function accesibleDrive(file){
+function accesibleDrive_(file){
   return file.getSharingAccess().toString() === "ANYONE_WITH_LINK";
 }
 /**
  * 画像ファイルかどうか MIMEで判断
  */
-function typeOfImage(file){
+function typeOfImage_(file){
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
   const imageMimeTypes = ["image/jpeg", "image/png", "image/svg+xml"];
   return imageMimeTypes.includes(file.getMimeType());
@@ -73,7 +73,7 @@ function typeOfImage(file){
 /**
  * Googleドライブ上にある画像ファイルをbase64形式で返す
  */
-function createImageBase64(file){
+function createImageBase64_(file){
   const fileBlob = file.getBlob();
   const base64Data = Utilities.base64Encode(fileBlob.getBytes());
   const contentType = fileBlob.getContentType();
