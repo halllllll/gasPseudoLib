@@ -1,14 +1,12 @@
 <header class="text-gray-600 body-font bg-blue-200">
     <div class="container flex mx-auto p-5">
-      <div class="flex flex-grow w-full items-center">
-        <img v-bind:src="logoImg" class="h-10 w-20 pr-10">
-        <span class="text-xl flex-grow">ほんのけんさく（たいけんばん）</span>
+      <div class="flex inline-flex h-10 flex-grow w-full items-center">
+        <img v-bind:src="logoImg" class="w-40 pr-10">
+        <pre class="lg:text-2xl flex flex-grow justify-center">ほんのけんさく（たいけんばん）</pre>
       </div>
-      <div class="inline-flex justify-end">
-        <label class="">
-          <span class="ml-2">ひらがなモード（β） </span>
-          <input type="checkbox" class="w-6 h-6 rounded" v-model="hiraganaMode"/>
-        </label>
-      </div>
+      <label class="inline-flex items-center">
+        <span class="ml-2">ひらがなモード（β） </span>
+        <input type="checkbox" class="w-6 h-6 rounded" v-model="hiraganaMode"/>
+      </label>
     </div>
 </header>
