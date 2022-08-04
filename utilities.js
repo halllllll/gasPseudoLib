@@ -77,7 +77,7 @@ function createImageBase64_(file){
   const fileBlob = file.getBlob();
   const base64Data = Utilities.base64Encode(fileBlob.getBytes());
   const contentType = fileBlob.getContentType();
-  const base64Url = "data:" + contentType + ";base64," + base64Data;
+  const base64Url = `data:${contentType};base64,${base64Data}`;
   return base64Url;
 }
 
