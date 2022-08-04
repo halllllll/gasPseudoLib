@@ -23,14 +23,61 @@ function convertA1toColNum_(strCol){
   return iNum;
 }
 
-function t(){
-  const arr = ["E", "A", "X", "U", "T", "AA", "CAE", 93, "GREAT"];
+/**
+ * Google Drive上の画像IDからその画像のbase64urlを取得
+ * @param {String} fileId 
+ * @returns {String} ret - formatedBase64Url
+ */
+ function getBase64UrlOnDriveImage(fileId){  
+  // check
+  // - Drive上にあるか
+  // - アクセスできるか
+  // - 画像ファイルかどうか
   try{
-    for(let a of arr){
-      const ret = convertA1toColNum_(a);
-      console.log(a, ret);
+    const file = DriveApp.getFileById(fileId);
+    if(file === null){
+      console.error("ドライブ上のファイルじゃないかも");
+      throw new Error("is this file on Google Drive?");
     }
+    if(!accesibleDrive(file)){
+      console.error("アクセスできないファイル permission not `ANYONE_WITH_LINK`");
+      throw new Error("permission not `ANYONE_WITH_LINK`");
+    }
+    if(!typeOfImage(file)){
+      console.error("not image file");
+      throw new Error("not image file?");
+    }
+    const ret = createImageBase64(file);
+    return ret;
   }catch(e){
-    console.log(e);
+    console.error(e);
+    throw new Error(e);
   }
 }
+
+/**
+ * Googleドライブに存在かつアクセスできる
+ */
+function accesibleDrive(file){
+  return file.getSharingAccess().toString() === "ANYONE_WITH_LINK";
+}
+/**
+ * 画像ファイルかどうか MIMEで判断
+ */
+function typeOfImage(file){
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+  const imageMimeTypes = ["image/jpeg", "image/png", "image/svg+xml"];
+  return imageMimeTypes.includes(file.getMimeType());
+}
+
+/**
+ * Googleドライブ上にある画像ファイルをbase64形式で返す
+ */
+function createImageBase64(file){
+  const fileBlob = file.getBlob();
+  const base64Data = Utilities.base64Encode(fileBlob.getBytes());
+  const contentType = fileBlob.getContentType();
+  const base64Url = "data:" + contentType + ";base64," + base64Data;
+  return base64Url;
+}
+
