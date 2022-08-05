@@ -51,7 +51,7 @@ function convertTitleToKanaByOpenBD_(){
     const kanaVal = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`).getDisplayValues().flat();
     const triggers = ScriptApp.getProjectTriggers();
 
-    const range2 = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`);
+    const range = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`);
 
     for(let trigger of triggers){
         if(trigger.getHandlerFunction() === "convertTitleToKanaByOpenBD_"){
@@ -66,7 +66,7 @@ function convertTitleToKanaByOpenBD_(){
         properties.setProperty(`taskIdx`, taskIdx);
     }
     const startIdx = taskIdx;
-    let result = [];
+    // let result = [];
     for(let i = taskIdx; i < isbnVal.length; i++){
         // 実行時間チェック
         const curTime = new Date();
@@ -77,17 +77,18 @@ function convertTitleToKanaByOpenBD_(){
             taskIdx = i-1;
             console.log(`range start from: ${startIdx}, end ${taskIdx}`);
             properties.setProperty("taskIdx", taskIdx);
-            const range = DataSheet.getRange(`${COL_KANATITLE}${startIdx+2}:${COL_KANATITLE}${taskIdx+2}`); 
-            console.log(`so, range height: ${range.getHeight()}`);
-            console.log(`and, result length: ${result.length}`);
+            // const range = DataSheet.getRange(`${COL_KANATITLE}${startIdx+2}:${COL_KANATITLE}${taskIdx+2}`); 
+            // console.log(`so, range height: ${range.getHeight()}`);
+            // console.log(`and, result length: ${result.length}`);
             // range.setValues(result);
+            console.log(`and, result : ${taskIdx - startIdx}`);
             const nextTrigger = ScriptApp.newTrigger("convertTitleToKanaByOpenBD_").timeBased().after(30000).create(); // 30秒後
             return;
         }
 
         // 都度rangeで取得したい衝動がある（一個一個BGColorつけたい)
 
-        const cell = range2.getCell(i+1, 1);
+        const cell = range.getCell(i+1, 1);
 
         // ここから取得
         const curIsbn = isbnVal[i];

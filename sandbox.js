@@ -158,3 +158,11 @@ function searchTest(){
       console.log(key, val);
   }
 }
+
+
+function pp(){
+    const properties = PropertiesService.getScriptProperties();
+    for(let k of properties.getKeys()){
+        console.log(k, properties.getProperty(k));
+    }
+}
