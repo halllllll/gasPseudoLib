@@ -66,6 +66,7 @@ function convertTitleToKanaByOpenBD_(){
         properties.setProperty(`taskIdx`, taskIdx);
     }
     const startIdx = taskIdx;
+    let newReggisted = 0;
     // let result = [];
     for(let i = taskIdx; i < isbnVal.length; i++){
         // 実行時間チェック
@@ -81,7 +82,7 @@ function convertTitleToKanaByOpenBD_(){
             // console.log(`so, range height: ${range.getHeight()}`);
             // console.log(`and, result length: ${result.length}`);
             // range.setValues(result);
-            console.log(`and, result : ${taskIdx - startIdx}`);
+            console.log(`and, result : ${taskIdx - startIdx}, new : ${newReggisted}`);
             const nextTrigger = ScriptApp.newTrigger("convertTitleToKanaByOpenBD_").timeBased().after(30000).create(); // 30秒後
             return;
         }
@@ -110,6 +111,7 @@ function convertTitleToKanaByOpenBD_(){
         console.log(i, titleVal[i], curIsbn, kanaTitle, kanaToHira_(kanaTitle), cell.getDisplayValue());
         cell.setBackground("#97bad9");
         cell.setValue(kanaToHira_(kanaTitle));
+        newReggisted++;
         // result.push([kanaToHira_(kanaTitle)]);
     }
     properties.deleteProperty("taskIdx");
