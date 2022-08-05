@@ -23,34 +23,31 @@ function genMenu_(){
  * ISBN列をもとにして本のデータを取得
  * openbdを使用
  * データから読み方を取得
- * 不要なfetchはしないようにしたい
- * 連続押下を防ぐためのフラグを用意したい（あとでやる）
+ * 毎回fetchする。openbdはどんどん使ってくれとのことなので
  */
 function convertTitleToKanaByOpenBD_(){
     const properties = PropertiesService.getScriptProperties();
     // 排他的フラグでブロック
-    const execUser = properties.getProperty(CONVERTING_KANA_FLAG);
+    const execUser = properties.getProperty(CONVERTING_KANA_USER);
     // 時間でのトリガーならブロックしない
     
     if(execUser === null){
-        properties.setProperty(CONVERTING_KANA_FLAG, Session.getActiveUser().getEmail());
+        properties.setProperty(CONVERTING_KANA_USER, Session.getActiveUser().getEmail());
     }else if(execUser !== Session.getActiveUser().getEmail()){
-      // SpreadsheetApp.getUi().alert(`${execUser}が使用中です`); 時間主導トリガーだと呼び出せずエラーになる
       SpreadsheetApp.getUi().alert(`${execUser}が使用中です`);
       return;
+    }else{
+
     }
 
     // 実行時間計測用
     const startTime = new Date();
-    const limitMin = 1;
+    const limitMin = 3;
     // ヘッダー無視　以降、ヘッダー亡き者として考える
     const isbnVal = DataSheet.getRange(`${COL_ISBN}2:${COL_ISBN}`).getDisplayValues().flat();
     // タイトル取得
     const titleVal = DataSheet.getRange(`${COL_TITLE}2:${COL_TITLE}`).getDisplayValues().flat();
-    // 無駄なfetchを防ぐため、すでに入力済のセルは無視する
-    const kanaVal = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`).getDisplayValues().flat();
     const triggers = ScriptApp.getProjectTriggers();
-
     const range = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`);
 
     for(let trigger of triggers){
@@ -73,51 +70,35 @@ function convertTitleToKanaByOpenBD_(){
         const curTime = new Date();
         const difTime = parseInt((curTime.getTime() - startTime.getTime())/(1000*60));
         if(difTime >= limitMin){
-            // 実行猶予時間を越えているのでここまでの結果を反映してトリガー設定しておわり
-            // （時間を甘く見積もってるので、残り時間でsetValuesするくらいの余裕はあると思われる）
-            taskIdx = i-1;
-            console.log(`range start from: ${startIdx}, end ${taskIdx}`);
+            // 実行猶予時間を越えているので次のトリガー設定しておわり
+            console.log(`range start from: ${startIdx}, end ${taskIdx-1}`);
             properties.setProperty("taskIdx", taskIdx);
-            // const range = DataSheet.getRange(`${COL_KANATITLE}${startIdx+2}:${COL_KANATITLE}${taskIdx+2}`); 
-            // console.log(`so, range height: ${range.getHeight()}`);
-            // console.log(`and, result length: ${result.length}`);
-            // range.setValues(result);
-            console.log(`and, result : ${taskIdx - startIdx}, new : ${newReggisted}`);
+            console.log(`and, result : ${(taskIdx - 1) - startIdx}, new : ${newReggisted}`);
             const nextTrigger = ScriptApp.newTrigger("convertTitleToKanaByOpenBD_").timeBased().after(30000).create(); // 30秒後
             return;
         }
 
         // 都度rangeで取得したい衝動がある（一個一個BGColorつけたい)
-
         const cell = range.getCell(i+1, 1);
 
         // ここから取得
         const curIsbn = isbnVal[i];
-        const curKana = kanaVal[i]; // 不要なfetchを防ぐためすでに入力済のかなタイトルは無視
-        // if(curIsbn === "" || curKana !== ""){
-        //     result.push([curKana]);
-        //     continue;
-        // }
-
         const data = getBookData_(curIsbn);
         const kanaTitle = data[0] !== null ? data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkey : "";
         // collationkeyが存在しないパターンがある
-        if(kanaTitle === undefined || kanaTitle === ""){
-            console.log(`${curIsbn}: openbd上でonix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkeyがみつかりませんでした`);
-            // result.push("{{not find `collationkey`}}");
-            // result.push([curKana]);
+        if(kanaTitle === undefined || kanaTitle === "" || kanaTitle === null){
+            console.info(`${curIsbn}: openbd上でonix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkeyがみつかりませんでした`);
             continue;
         }
         console.log(i, titleVal[i], curIsbn, kanaTitle, kanaToHira_(kanaTitle), cell.getDisplayValue());
+
         cell.setBackground("#97bad9");
         cell.setValue(kanaToHira_(kanaTitle));
         newReggisted++;
-        // result.push([kanaToHira_(kanaTitle)]);
     }
     properties.deleteProperty("taskIdx");
-    properties.deleteProperty(CONVERTING_KANA_FLAG);
+    properties.deleteProperty(CONVERTING_KANA_USER);
     SpreadsheetApp.getUi().alert("openbdから反映する処理が完了しました");
-
 }
 
 
@@ -190,5 +171,6 @@ function countKanaFilled_(){
         if(k === "")continue;
         count++;
     }
-    SpreadsheetApp.getUi().alert(`「${kanaHeader}」 記入数 \n${count} / ${kanaVal.length}`);
+    // Math.round 小数点第四位で四捨五入
+    SpreadsheetApp.getUi().alert(`「${kanaHeader}」 記入数 \n${count} / ${kanaVal.length} ( ${Math.round((count / kanaVal.length * 100)*1000)/1000} %)`);
 }
