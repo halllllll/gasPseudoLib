@@ -1,7 +1,7 @@
 /**
  * SpreadSheet側の画面
  */
-function onOpen(){
+ function onOpen(){
     // とくにトリガー設定しなくても開いちゃったな
     genMenu_();
 }
@@ -23,14 +23,14 @@ function genMenu_(){
  * ISBN列をもとにして本のデータを取得
  * openbdを使用
  * データから読み方を取得
- * 毎回fetchする。openbdはどんどん使ってくれとのことなので
+ * openbdはどんどんapi叩いてくれと言っているのでそうする
+ * 連続押下を防ぐためのフラグを用意したい（あとでやる）
  */
 function convertTitleToKanaByOpenBD_(){
     const properties = PropertiesService.getScriptProperties();
     // 排他的フラグでブロック
     const execUser = properties.getProperty(CONVERTING_KANA_USER);
     // 時間でのトリガーならブロックしない
-    
     if(execUser === null){
         properties.setProperty(CONVERTING_KANA_USER, Session.getActiveUser().getEmail());
     }else if(execUser !== Session.getActiveUser().getEmail()){
@@ -39,7 +39,6 @@ function convertTitleToKanaByOpenBD_(){
     }else{
 
     }
-
     // 実行時間計測用
     const startTime = new Date();
     const limitMin = 3;
@@ -85,6 +84,7 @@ function convertTitleToKanaByOpenBD_(){
         const curIsbn = isbnVal[i];
         const data = getBookData_(curIsbn);
         const kanaTitle = data[0] !== null ? data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkey : "";
+        console.log(`kanaTitle? ${kanaTitle}`);
         // collationkeyが存在しないパターンがある
         if(kanaTitle === undefined || kanaTitle === "" || kanaTitle === null){
             console.info(`${curIsbn}: openbd上でonix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkeyがみつかりませんでした`);
@@ -101,6 +101,17 @@ function convertTitleToKanaByOpenBD_(){
     SpreadsheetApp.getUi().alert("openbdから反映する処理が完了しました");
 }
 
+/**
+ * API叩くところ(テスト)
+ */
+function apitest(){
+    const testData = ["4-7743-1340-5", "978-4-591-15523-3", "978-4-477-02549-0", "4-652-02083-X", "4-00-113147-1"];
+    for(let [idx, v] of testData.entries()){
+        const data = getBookData_(v);
+        const kanaTitle = data[0] !== null ? data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkey : "";
+        console.log(v, kanaTitle, kanaToHira_(kanaTitle));
+    }
+}
 
 /**
  * もともと仮名とカナオンリーのタイトルだったらAPI叩く意味なさそうなので、
@@ -114,7 +125,7 @@ function mapKanaTitle_(){
     // タイトル取得
     const titleVal = titleRange.getDisplayValues().flat();
     // かな変換後のカラム 不要な変換を防ぐため、すでに埋まっている箇所は無視する
-    // const kanaVal = kanaRange.getDisplayValues().flat();
+    const kanaVal = kanaRange.getDisplayValues().flat();
     for(let i=0; i<titleVal.length; i++){
         // if(kanaVal[i] !== "")continue;
         if(!containsKanji_(titleVal[i]))continue; // 漢字が含まれていたらそのまま流用できない
@@ -171,6 +182,5 @@ function countKanaFilled_(){
         if(k === "")continue;
         count++;
     }
-    // Math.round 小数点第四位で四捨五入
-    SpreadsheetApp.getUi().alert(`「${kanaHeader}」 記入数 \n${count} / ${kanaVal.length} ( ${Math.round((count / kanaVal.length * 100)*1000)/1000} %)`);
+    SpreadsheetApp.getUi().alert(`「${kanaHeader}」 記入数 \n${count} / ${kanaVal.length} (${Math.round((count/kanaVal.length * 100) * 1000)/1000}%)`);
 }

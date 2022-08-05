@@ -14,4 +14,4 @@ const COL_ISBN = "E";
 const COL_KANATITLE = "G";
 
 // ひらがな変換用排他的Fetchフラグ
-const CONVERTING_KANA_USER = null;
+const CONVERTING_KANA_USER = "CONVERTING_KANA_USER";
