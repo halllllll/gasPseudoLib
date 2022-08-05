@@ -32,12 +32,12 @@ function convertTitleToKanaByOpenBD_(){
     const execUser = properties.getProperty(CONVERTING_KANA_FLAG);
     // 時間でのトリガーならブロックしない
     
-    if(execUser !== null || execUser !== Session.getActiveUser().getEmail()){
+    if(execUser === null){
+        properties.setProperty(CONVERTING_KANA_FLAG, Session.getActiveUser().getEmail());
+    }else if(execUser !== Session.getActiveUser().getEmail()){
       // SpreadsheetApp.getUi().alert(`${execUser}が使用中です`); 時間主導トリガーだと呼び出せずエラーになる
       SpreadsheetApp.getUi().alert(`${execUser}が使用中です`);
-      // return;
-    }else{
-      properties.setProperty(CONVERTING_KANA_FLAG, Session.getActiveUser().getEmail());
+      return;
     }
 
     // 実行時間計測用
@@ -50,6 +50,8 @@ function convertTitleToKanaByOpenBD_(){
     // 無駄なfetchを防ぐため、すでに入力済のセルは無視する
     const kanaVal = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`).getDisplayValues().flat();
     const triggers = ScriptApp.getProjectTriggers();
+
+    const range2 = DataSheet.getRange(`${COL_KANATITLE}2:${COL_KANATITLE}`);
 
     for(let trigger of triggers){
         if(trigger.getHandlerFunction() === "convertTitleToKanaByOpenBD_"){
@@ -78,29 +80,36 @@ function convertTitleToKanaByOpenBD_(){
             const range = DataSheet.getRange(`${COL_KANATITLE}${startIdx+2}:${COL_KANATITLE}${taskIdx+2}`); 
             console.log(`so, range height: ${range.getHeight()}`);
             console.log(`and, result length: ${result.length}`);
-            range.setValues(result);
+            // range.setValues(result);
             const nextTrigger = ScriptApp.newTrigger("convertTitleToKanaByOpenBD_").timeBased().after(30000).create(); // 30秒後
             return;
         }
+
+        // 都度rangeで取得したい衝動がある（一個一個BGColorつけたい)
+
+        const cell = range2.getCell(i+1, 1);
+
         // ここから取得
         const curIsbn = isbnVal[i];
         const curKana = kanaVal[i]; // 不要なfetchを防ぐためすでに入力済のかなタイトルは無視
-        if(curIsbn === "" || curKana !== ""){
-            result.push([curKana]);
-            continue;
-        }
+        // if(curIsbn === "" || curKana !== ""){
+        //     result.push([curKana]);
+        //     continue;
+        // }
+
         const data = getBookData_(curIsbn);
         const kanaTitle = data[0] !== null ? data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkey : "";
-        console.log(`kanaTitle? ${kanaTitle}`);
         // collationkeyが存在しないパターンがある
-        if(kanaTitle === undefined){
+        if(kanaTitle === undefined || kanaTitle === ""){
             console.log(`${curIsbn}: openbd上でonix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkeyがみつかりませんでした`);
             // result.push("{{not find `collationkey`}}");
-            result.push([curKana]);
+            // result.push([curKana]);
             continue;
         }
-        console.log(i, titleVal[i], curIsbn, kanaTitle, kanaToHira_(kanaTitle));
-        result.push([kanaToHira_(kanaTitle)]);
+        console.log(i, titleVal[i], curIsbn, kanaTitle, kanaToHira_(kanaTitle), cell.getDisplayValue());
+        cell.setBackground("#97bad9");
+        cell.setValue(kanaToHira_(kanaTitle));
+        // result.push([kanaToHira_(kanaTitle)]);
     }
     properties.deleteProperty("taskIdx");
     properties.deleteProperty(CONVERTING_KANA_FLAG);
@@ -108,17 +117,6 @@ function convertTitleToKanaByOpenBD_(){
 
 }
 
-/**
- * API叩くところ(テスト)
- */
-function t(){
-    const testData = ["4-7743-1340-5", "978-4-591-15523-3", "978-4-477-02549-0", "4-652-02083-X", "4-00-113147-1"];
-    for(let [idx, v] of testData.entries()){
-        const data = getBookData_(v);
-        const kanaTitle = data[0] !== null ? data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkey : "";
-        console.log(v, kanaTitle, kanaToHira_(kanaTitle));
-    }
-}
 
 /**
  * もともと仮名とカナオンリーのタイトルだったらAPI叩く意味なさそうなので、
@@ -132,7 +130,7 @@ function mapKanaTitle_(){
     // タイトル取得
     const titleVal = titleRange.getDisplayValues().flat();
     // かな変換後のカラム 不要な変換を防ぐため、すでに埋まっている箇所は無視する
-    const kanaVal = kanaRange.getDisplayValues().flat();
+    // const kanaVal = kanaRange.getDisplayValues().flat();
     for(let i=0; i<titleVal.length; i++){
         // if(kanaVal[i] !== "")continue;
         if(!containsKanji_(titleVal[i]))continue; // 漢字が含まれていたらそのまま流用できない
