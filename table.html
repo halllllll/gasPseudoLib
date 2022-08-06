@@ -1,0 +1,14 @@
+<div class="container mx-auto px-8">
+    <table class="w-full table-auto">
+        <thead>
+        <tr>
+            <th scope="col" v-for="(h, idx) in tableHeader" v-bind:key="h.name" class="px-6 py-5" v-bind:class="h.thWidth">{{h.name}}</th>
+        </tr>
+        </thead>
+        <tbody class="mb-30">
+        <tr v-for="(row, idx) in items" v-bind:key="idx" class="bg-gray-100 border-b border-gray-700 mx-4 my-8">
+            <td v-for="h in sheetHeader" class="border px-3 py-2 whitespace-nowrap text-left">{{row[h]}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
