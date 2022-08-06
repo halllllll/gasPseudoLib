@@ -76,10 +76,10 @@ function searchTest(){
     // ひらがなモード仮　しょうがないのでここでデータを入れ替える   オリジナルの名前の列とひらがなの名前の列を入れ替える
 
     const values = experimental_hiraganaMode ? 
-          DataSheet.getDataRange().getValues().map(row=>{
+          DataSheet.getDataRange().getDisplayValues().map(row=>{
               [row[kanaTitleColIdx], row[titleColIdx]] = [row[titleColIdx], row[kanaTitleColIdx]];
               return row;
-          }) : DataSheet.getDataRange().getValues();
+          }) : DataSheet.getDataRange().getDisplayValues();
 
     // 1ページあたりの表示件数
     const limitNum = 50;
