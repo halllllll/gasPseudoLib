@@ -1,14 +1,12 @@
-<template v-if="paginateState !== null">
-    <div class="py-5 flex justify-center">
-      <nav aria-label="Page navigation">
-        <ul class="flex list-style-none space-x-8">
-          <li v-if="paginateState !== 'onFirstPage'" class="prev">
-            <button v-on:click.stop.prevent="prePage" class="border-2 border-blue-400 hover:bg-gray-300 text-blue py-2 px-10 rounded-full transition duration-150 ease-in-out"><span aria-hidden="true">&laquo;</span>もどる</button>
-          </li>
-          <li v-if="paginateState !== 'onLastPage'" class="nex">
-            <button v-on:click.stop.prevent="nexPage" class="border-2 border-blue-400 hover:bg-gray-300 text-blue py-2 px-10 rounded-full transition duration-150 ease-in-out"><span aria-hidden="true">&raquo;</span>すすむ</button>
-          </li>
-        </ul>
-      </nav>
-    </div>
-</template>
+<div class="py-5 flex justify-center">
+  <nav aria-label="Page navigation">
+    <ul class="flex list-style-none space-x-8">
+      <li v-show="paginateState !== 'onFirstPage'" class="prev">
+        <button v-on:click.stop.prevent="prePage" class="border-2 border-blue-400 hover:bg-gray-300 text-blue py-2 px-10 rounded-full transition duration-150 ease-in-out"><span aria-hidden="true">&laquo;</span>もどる</button>
+      </li>
+      <li v-show="paginateState !== 'onLastPage'" class="nex">
+        <button v-on:click.stop.prevent="nexPage" class="border-2 border-blue-400 hover:bg-gray-300 text-blue py-2 px-10 rounded-full transition duration-150 ease-in-out"><span aria-hidden="true">&raquo;</span>すすむ</button>
+      </li>
+    </ul>
+  </nav>
+</div>
