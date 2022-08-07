@@ -4,7 +4,7 @@
       searchWords: "",
       pageNum: 0,
       message: "",
-      loading: false, 
+      // loading: false, 
       items: null,
       andOrOption: "OR", // html側でchecked入れててもデフォルトは空文字らしいので
       includeAuthorName: false,
@@ -29,7 +29,39 @@
       // ページネーション用？ 初期値, 最初, 中間, 最後
       // null, onFirstPage, onMidPage, onLastPage
       paginateState: null,
+
+      // ページネーション改修してみる 状態は3つ(エラーは数えないものとする)
+      // 算出プロパティにしようかと思ったが、値を返す必要がないので、
+      // watchでいいかもしれない　のでそうしてみる
+      paginateState2: "ready",
     }),
+
+    /*
+    computed:{
+      pagenator: {
+        get: function(){
+          return this.paginateState2;
+        },
+        set: function(state){
+          this.paginateState2 = state;
+        }
+      } 
+    },
+    */
+    watch: {
+      paginateState2: function(curExpectedState, oldState){
+        if(curExpectedState === "loading"){
+          this.message = "けんさくちゅう...";
+        }else if(curExpectedState === "viewingResult"){
+          this.message = "けんさくけっか！";
+        }else if(curExpectedState === "ready"){
+
+        }else{
+          console.log("ページネーション用の状態管理でここにくることなくない？");
+        }
+      },
+    },
+
     methods: {
       updatePageState: function(sheetData){
         console.log(`items`);
@@ -67,20 +99,20 @@
       loadData: async function(event){
         // 検索開始 = 1ページ目から表示
         this.pageNum = 1;
-        this.paginateState = null;
+        // this.paginateState = null;
+        // this.paginateState2 = "loading";
         const sheetData = await this.searchData();
         this.items = sheetData.data;
         this.updatePageState(sheetData);
       },
 
       searchData: function(){
-        this.message = "けんさくちゅう...";
-        this.loading = true;
+        this.paginateState2 = "loading";
+        // objectとかjsonで送れるブランチを切るわ
         return new Promise((resolve, reject) => {
         google.script.run
           .withSuccessHandler((result) => {
-            this.message = "けんさくけっか！";
-            this.loading = false;
+            this.paginateState2 = "viewingResult";
             resolve(result);
           })
           .withFailureHandler((error) => {

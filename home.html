@@ -34,8 +34,10 @@
 
       
     </div>
-
-    <div v-show="paginateState !== null">
+    <div v-show="paginateState2 === 'ready'">
+      なんか画面
+    </div>
+    <div v-show="paginateState2 !== 'ready'">
       <!-- ページネーション -->
       <?!= include('pagination'); ?>
       <!-- table (main contents) -->
