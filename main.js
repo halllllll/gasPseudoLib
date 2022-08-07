@@ -129,8 +129,15 @@ function genGenreTable(){
  * Vueのgoogle.script.runから呼ばれる
  * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
-function search(header, words, page, andOrOption, includeAuthorName, experimental_hiraganaMode){
+function search(options){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
+    const decodedObj = JSON.parse(options);
+    const header = decodedObj.header;
+    const words = decodedObj.words;
+    const page = decodedObj.page;
+    const andOrOption = decodedObj.andOrOption;
+    const includeAuthorName = decodedObj.includeAuthorName;
+    const experimental_hiraganaMode = decodedObj.experimental_hiraganaMode;
     let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
     switch(andOrOption){
         case "OR":
