@@ -107,19 +107,27 @@
       },
 
       searchData: function(){
-        this.paginateState2 = "loading";
-        // objectとかjsonで送れるブランチを切るわ
+        this.message = "けんさくちゅう...";
+        this.loading = true;
+        const seachOptions = {
+          "header": this.sheetHeader,
+          "words": this.searchWords,
+          "page": this.pageNum,
+          "andOrOption": this.andOrOption,
+          "includeAuthorName": this.includeAuthorName,
+        };
         return new Promise((resolve, reject) => {
-        google.script.run
-          .withSuccessHandler((result) => {
-            this.paginateState2 = "viewingResult";
-            resolve(result);
-          })
-          .withFailureHandler((error) => {
-            console.log(error);
-            reject(error);
-          })
-          .search(this.sheetHeader, this.searchWords, this.pageNum, this.andOrOption, this.includeAuthorName, this.hiraganaMode);
+          google.script.run
+            .withSuccessHandler((result) => {
+              this.message = "けんさくけっか！";
+              this.loading = false;
+              resolve(result);
+            })
+            .withFailureHandler((error) => {
+              console.log(error);
+              reject(error);
+            })
+            .search(JSON.stringify(seachOptions));
         });
       },
     },
