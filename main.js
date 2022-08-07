@@ -69,6 +69,13 @@ function include(filename) {
     return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
+function includeHeaderLogoTemplate(filename){
+    const html = HtmlService.createTemplateFromFile(filename);
+    // htmlの属性の値にscriptletがあってもちゃんと評価される
+    html.webAppUrl = ScriptApp.getService().getUrl();
+    return html.evaluate().getContent();
+}
+
 /**
  * 分類表をもとに変換
  */
