@@ -69,6 +69,13 @@ function include(filename) {
     return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
+function includeHeaderLogoTemplate(filename){
+    const html = HtmlService.createTemplateFromFile(filename);
+    // htmlの属性の値にscriptletがあってもちゃんと評価される
+    html.webAppUrl = ScriptApp.getService().getUrl();
+    return html.evaluate().getContent();
+}
+
 /**
  * 分類表をもとに変換
  */
@@ -212,16 +219,6 @@ function search(options){
         // 検索オプション（本のタイトル+人名など）を使ったときの重複排除とソート用
         const addedData = new Map();
 
-        //     const data = curTargetTitleRanges.map((r)=>{
-        // // valuesはヘッダー行を含まない0オーダー && rowIndexは1オーダーなので
-        //         const rNum = r.getRowIndex()-1;
-        //         Logger.log(`${rNum}: ${values[rNum]}`);
-        //         let tmpObj = {};
-        //         values[rNum].map((item, index) => {
-        //             setObjProperties(tmpObj, index, item, header);
-        //         });
-        //         return tmpObj;
-        //     });
         // 重複排除 ほんとはソートもしたいけどあとでやる....
         const data = curTargetTitleRanges.reduce((pre, _, rangeArrIdx, rangeArr) => {
             const curObj = rangeArr[rangeArrIdx];

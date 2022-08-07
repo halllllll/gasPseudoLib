@@ -1,4 +1,4 @@
-<form v-on:submit.prevent class="w-full flex flex-col md:flex-row">
+<form v-on:submit.prevent.stop class="w-full flex flex-col md:flex-row">
     <div class="inline-flex flex-col flex-auto">
       <div class="flex-shrink-0 flex-1 px-2">
         <input class="w-full text-xl bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-green-500" id="inline-searchWords" type="text" placeholder="けんさくワード" v-model="searchWords">

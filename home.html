@@ -8,12 +8,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic&display=swap" rel="stylesheet"> 
   <!-- tailwind -->
-  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.1.8"></script>
   <?!= include('css'); ?>
 </head>
 <body>
   <div id="app" v-cloak>
-    <?!= include('header'); ?>
+    <?!= includeHeaderLogoTemplate('header'); ?>
     <div class="container mx-auto px-8 py-4">
 
       <!-- 入力フォーム -->
@@ -34,8 +34,10 @@
 
       
     </div>
-
-    <div v-show="paginateState !== null">
+    <div v-show="paginateState2 === 'ready'">
+      なんか画面
+    </div>
+    <div v-show="paginateState2 !== 'ready'">
       <!-- ページネーション -->
       <?!= include('pagination'); ?>
       <!-- table (main contents) -->
@@ -50,6 +52,7 @@
     </div>
 
     <pre>{{$data}}</pre> -->
+    <pre>{{$data}}</pre>
   </div>
   <!-- vue.js -->
   <script src="https://unpkg.com/vue@3.2.20"></script>
