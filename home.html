@@ -35,7 +35,8 @@
       
     </div>
 
-    <div v-show="paginateState !== null">
+    <!-- <div v-show="paginateState !== null"> -->
+      <div v-show="pageState !== 'welcome'">
       <!-- ページネーション -->
       <?!= include('pagination'); ?>
       <!-- table (main contents) -->
@@ -50,6 +51,7 @@
     </div>
 
     <pre>{{$data}}</pre> -->
+    <pre>{{$data}}</pre>
   </div>
   <!-- vue.js -->
   <script src="https://unpkg.com/vue@3.2.20"></script>

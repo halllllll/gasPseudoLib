@@ -137,8 +137,9 @@ function search(options){
     const page = decodedObj.page;
     const andOrOption = decodedObj.andOrOption;
     const includeAuthorName = decodedObj.includeAuthorName;
-    const experimental_hiraganaMode = decodedObj.experimental_hiraganaMode;
+    const experimental_hiraganaMode = decodedObj.hiraganaMode;
     let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
+
     switch(andOrOption){
         case "OR":
             searchWords = `(${searchWords.join("|")})`;

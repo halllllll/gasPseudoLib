@@ -1,6 +1,7 @@
 <script>
   const app = Vue.createApp({
     data: ()=>({
+      pageState: null,
       searchWords: "",
       pageNum: 0,
       message: "",
@@ -26,54 +27,58 @@
       // ヘッダーロゴ
       logoImg: null,
 
-      // ページネーション用？ 初期値, 最初, 中間, 最後
-      // null, onFirstPage, onMidPage, onLastPage
-      paginateState: null,
     }),
-    methods: {
-      updatePageState: function(sheetData){
-        console.log(`items`);
-        console.log(this.items);
-        console.log(`count: ${sheetData.resultNum}`);
-        console.log(`curpage: ${sheetData.curPage}`);
-        console.log(`maxpage: ${sheetData.maxPage}`);
-
-        if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
-          this.paginateState = null;
-        }else if(parseInt(sheetData.curPage) === 1){
-          this.paginateState = "onFirstPage";         
-        }else if(parseInt(sheetData.maxPage) === parseInt(sheetData.curPage)){
-          this.paginateState = "onLastPage";
-        }else if(1 < parseInt(sheetData.curPage) && parseInt(sheetData.curPage) < parseInt(sheetData.maxPage)){
-          this.paginateState = "onMidPage"
+    watch: {
+      pageState: function(curState, oldState){
+        console.log(curState);
+        if(curState === "welcome"){
+          this.message = "てすとだよ";
+          this.loading = false;
+        }else if(curState === "searching"){
+          this.message = "けんさくちゅう...";
+          this.loading = true;
+        }else if(curState === "searched"){
+          this.message = "けんさくけっか！";
+          this.loading = false;
         }else{
-          console.log(`???`);
+          console.log(`??? curState: ${curState} oldState: ${oldState}`);
         }
       },
+    },
+    methods: {
+      // これそもそもいらなくなる？
       prePage: async function(){
+        // ここで押せる状態かどうかを判断する必要はない
         console.log(`prev page`);
         this.pageNum =  parseInt(Math.max(this.pageNum-1, 0));
         const sheetData = await this.searchData();
         this.items = sheetData.data;
-        this.updatePageState(sheetData);
+        // this.updatePageState(sheetData);
       },
       nexPage: async function(){
         console.log(`nex page`);
+        // ここで押せる状態かどうかを判断する必要はない
         this.pageNum++;
         const sheetData = await this.searchData();
         this.items = sheetData.data;
-        this.updatePageState(sheetData);
+        // this.updatePageState(sheetData);
       },
-      loadData: async function(event){
+      searchStart: async function(event){
         // 検索開始 = 1ページ目から表示
+        console.log(`検索ボタン押下`);
         this.pageNum = 1;
-        this.paginateState = null;
+        // this.paginateState = null;
+
         const sheetData = await this.searchData();
         this.items = sheetData.data;
-        this.updatePageState(sheetData);
+        // this.updatePageState(sheetData);
       },
 
       searchData: function(){
+        // this.message = "けんさくちゅう...";
+        // this.loading = true;
+        this.pageState = "seaching";
+        // messageとかloadingとかはbindしてるわけじゃないから反応しないのかな
         this.message = "けんさくちゅう...";
         this.loading = true;
         const seachOptions = {
@@ -82,16 +87,19 @@
           "page": this.pageNum,
           "andOrOption": this.andOrOption,
           "includeAuthorName": this.includeAuthorName,
+          "hiraganaMode": this.hiraganaMode,
         };
         return new Promise((resolve, reject) => {
           google.script.run
             .withSuccessHandler((result) => {
-              this.message = "けんさくけっか！";
-              this.loading = false;
+              this.pageState = "searched";
+              // this.message = "けんさくけっか！";
+              // this.loading = false;
               resolve(result);
             })
             .withFailureHandler((error) => {
               console.log(error);
+              this.pageState = null; // あとで考える
               reject(error);
             })
             .search(JSON.stringify(seachOptions));
@@ -99,6 +107,8 @@
       },
     },
     created: function(){
+      // ページの状態をデフォルトに
+      this.pageState = "welcome";
       // apps script側でテーブルのやつ叩いとく
         google.script.run
           .withSuccessHandler((result) => {
