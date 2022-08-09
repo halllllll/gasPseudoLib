@@ -132,6 +132,8 @@ function genGenreTable(){
 function search(options){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
     const decodedObj = JSON.parse(options);
+    console.log(`decodeObj:`);
+    console.log(decodedObj);
     const header = decodedObj.header;
     const words = decodedObj.words;
     const page = decodedObj.page;
