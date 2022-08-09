@@ -46,7 +46,7 @@ function setTriggerForCache(){
 
 
 function showThisURL() {
-  console.log(ss.getUrl())
+  console.log(ss.getUrl());
 }
 
 function doGet(){
