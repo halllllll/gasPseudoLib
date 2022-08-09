@@ -88,7 +88,7 @@
 
         this.resp = sheetData;
       },
-
+ 
       searchData: function(options){
         this.pageState = "seaching";
 
@@ -106,7 +106,7 @@
             })
             .withFailureHandler((error) => {
               console.log(error);
-              // this.pageState = null; // あとで考える
+              this.pageState = null; // あとで考える
               reject(error);
             })
             .search(JSON.stringify(options));
