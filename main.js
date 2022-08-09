@@ -239,9 +239,9 @@ function search(options){
         }, []);
         console.log(`all count: ${targetTitleRanges.length}`);
         console.log(`max page: ${Math.ceil(targetTitleRanges.length/limitNum)}`);
-        retObj['data'] = data;
         retObj['resultNum'] = targetTitleRanges.length;
         retObj['maxPage'] = Math.ceil(targetTitleRanges.length/limitNum)
+        retObj['data'] = data;
     }else{        
         console.log("検索ワード空だったよ～");
         values.shift();
@@ -256,9 +256,9 @@ function search(options){
         });
         console.log(`all count: ${values.length}`);
         console.log(`max page: ${Math.ceil(values.length/limitNum)}`);
-        retObj['data'] = data;
         retObj['resultNum'] = values.length;
         retObj['maxPage'] = Math.ceil(values.length/limitNum);
+        retObj['data'] = data;
     }
     // 取れたかチェック
     if(Object.keys(retObj).length === 0){
