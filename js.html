@@ -11,17 +11,15 @@
       // - andOrOption
       // - includeAuthorName
       // - hiraganaMode
+
       searchWords: "",
-      pageNum: 0,
+      //  pageNum: 0,
       andOrOption: "OR", // html側でchecked入れててもデフォルトは空文字らしいので
       includeAuthorName: false,
       hiraganaMode: false,
       searchOptions : {}, // 検索条件保存用
 
-      items: null, // これもいらなくない？
-      count: null,
-      curPage: null,
-      maxPage: null,
+      resp: {},
 
       // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
       tableHeader: [
@@ -61,51 +59,35 @@
       prePage: async function(){
         // ここで押せる状態かどうかを判断する必要はない
         console.log(`prev page`);
-        this.pageNum =  parseInt(Math.max(this.pageNum-1, 0));
+        this.searchOptions.page--;
         const sheetData = await this.searchData();
-
-
-        this.items = sheetData.data;
-        this.count = sheetData.resultNum;
-        this.curPage = sheetData.curPage;
-        this.maxPage = sheetData.maxPage;
+        this.resp = sheetData;
       },
 
       nexPage: async function(){
         console.log(`nex page`);
         // ここで押せる状態かどうかを判断する必要はない
-        this.pageNum++;
+        this.searchOptions.page++;
         const sheetData = await this.searchData();
-
-        this.items = sheetData.data;
-        this.count = sheetData.resultNum;
-        this.curPage = sheetData.curPage;
-        this.maxPage = sheetData.maxPage;
+        this.resp = sheetData;
       },
       searchStart: async function(event){
         // 検索開始 = 1ページ目から表示
         console.log(`検索ボタン押下`);
-        this.pageNum = 1; // 要る？
-
         // 検索ボタンを押したときのみ検索オプションを反映する headerはなんか最初から入ってる（なんでだっけ）
         this.searchOptions = {
           "header": ["title", "author", "publisher", "genre"],
           "words": this.searchWords,
-          "page": this.pageNum,
+          "page": 1,
           "andOrOption": this.andOrOption,
           "includeAuthorName": this.includeAuthorName,
           "hiraganaMode": this.hiraganaMode,
-        }
-        
+        };
+
         const sheetData = await this.searchData(this.searchOptions);
 
-        // せっかく使いやすいobjectで帰ってくるけど今はいったん仕方なく全部変数に戻す
-        this.items = sheetData.data;
-        this.count = sheetData.resultNum;
-        this.curPage = sheetData.curPage;
-        this.maxPage = sheetData.maxPage;
+        this.resp = sheetData;
       },
-
 
       searchData: function(options){
         this.pageState = "seaching";
