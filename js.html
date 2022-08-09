@@ -1,14 +1,26 @@
 <script>
   const app = Vue.createApp({
     data: ()=>({
-      searchWords: "",
-      pageNum: 0,
+      pageState: null,
       message: "",
-      // loading: false, 
-      items: null,
+      loading: false,
+      // search options
+      // 検索ボタン押したときにそのときの設定を反映
+      // - searchWords
+      // - pageNum
+      // - andOrOption
+      // - includeAuthorName
+      // - hiraganaMode
+
+      searchWords: "",
+      //  pageNum: 0,
       andOrOption: "OR", // html側でchecked入れててもデフォルトは空文字らしいので
       includeAuthorName: false,
       hiraganaMode: false,
+      searchOptions : {}, // 検索条件保存用
+
+      resp: {},
+
       // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
       tableHeader: [
         {"name": "本の名前", "thWidth": "w-2/5"},
@@ -17,121 +29,94 @@
         {"name": "分類", "thWidth": "w-1/6"},
       ],
       tableHeaderWidths: ["w-2/5", "w-1/4", "w-1/5", "w-1/6"],
-      sheetHeader: [
-        "title", "author", "publisher", "genre", 
-      ],
 
       // ヘッダーロゴ用のGoogleドライブ上の画像ファイルのID
       fileId: "公開設定にした画像ファイルID",
       // ヘッダーロゴ
       logoImg: null,
 
-      // ページネーション用？ 初期値, 最初, 中間, 最後
-      // null, onFirstPage, onMidPage, onLastPage
-      paginateState: null,
-
-      // ページネーション改修してみる 状態は3つ(エラーは数えないものとする)
-      // 算出プロパティにしようかと思ったが、値を返す必要がないので、
-      // watchでいいかもしれない　のでそうしてみる
-      paginateState2: "ready",
     }),
-
-    /*
-    computed:{
-      pagenator: {
-        get: function(){
-          return this.paginateState2;
-        },
-        set: function(state){
-          this.paginateState2 = state;
-        }
-      } 
-    },
-    */
     watch: {
-      paginateState2: function(curExpectedState, oldState){
-        if(curExpectedState === "loading"){
+      pageState: function(curState, oldState){
+        console.log(curState);
+        if(curState === "welcome"){
+          this.message = "てすとだよ";
+          this.loading = false;
+        }else if(curState === "searching"){
+          // messageもloadingもbindじゃないので即時に変わるわけではない...
+          // mustacheじゃなくてタグの値にできないかな
           this.message = "けんさくちゅう...";
-        }else if(curExpectedState === "viewingResult"){
+          this.loading = true;
+        }else if(curState === "searched"){
           this.message = "けんさくけっか！";
-        }else if(curExpectedState === "ready"){
-
+          this.loading = false;
         }else{
-          console.log("ページネーション用の状態管理でここにくることなくない？");
+          console.log(`??? curState: ${curState} oldState: ${oldState}`);
         }
       },
     },
-
     methods: {
-      updatePageState: function(sheetData){
-        console.log(`items`);
-        console.log(this.items);
-        console.log(`count: ${sheetData.resultNum}`);
-        console.log(`curpage: ${sheetData.curPage}`);
-        console.log(`maxpage: ${sheetData.maxPage}`);
-
-        if(parseInt(sheetData.resultNum) < parseInt(sheetData.countLimit)){
-          this.paginateState = null;
-        }else if(parseInt(sheetData.curPage) === 1){
-          this.paginateState = "onFirstPage";         
-        }else if(parseInt(sheetData.maxPage) === parseInt(sheetData.curPage)){
-          this.paginateState = "onLastPage";
-        }else if(1 < parseInt(sheetData.curPage) && parseInt(sheetData.curPage) < parseInt(sheetData.maxPage)){
-          this.paginateState = "onMidPage"
-        }else{
-          console.log(`???`);
-        }
-      },
       prePage: async function(){
+        // ここで押せる状態かどうかを判断する必要はない
         console.log(`prev page`);
-        this.pageNum =  parseInt(Math.max(this.pageNum-1, 0));
+        this.searchOptions.page--;
         const sheetData = await this.searchData();
-        this.items = sheetData.data;
-        this.updatePageState(sheetData);
+        this.resp = sheetData;
       },
+
       nexPage: async function(){
         console.log(`nex page`);
-        this.pageNum++;
+        // ここで押せる状態かどうかを判断する必要はない
+        this.searchOptions.page++;
         const sheetData = await this.searchData();
-        this.items = sheetData.data;
-        this.updatePageState(sheetData);
+        this.resp = sheetData;
       },
-      loadData: async function(event){
+      searchStart: async function(event){
         // 検索開始 = 1ページ目から表示
-        this.pageNum = 1;
-        // this.paginateState = null;
-        // this.paginateState2 = "loading";
-        const sheetData = await this.searchData();
-        this.items = sheetData.data;
-        this.updatePageState(sheetData);
-      },
-
-      searchData: function(){
-        this.message = "けんさくちゅう...";
-        this.loading = true;
-        const seachOptions = {
-          "header": this.sheetHeader,
+        console.log(`検索ボタン押下`);
+        // 検索ボタンを押したときのみ検索オプションを反映する headerはなんか最初から入ってる（なんでだっけ）
+        this.searchOptions = {
+          "header": ["title", "author", "publisher", "genre"],
           "words": this.searchWords,
-          "page": this.pageNum,
+          "page": 1,
           "andOrOption": this.andOrOption,
           "includeAuthorName": this.includeAuthorName,
+          "hiraganaMode": this.hiraganaMode,
         };
+
+        const sheetData = await this.searchData(this.searchOptions);
+
+        this.resp = sheetData;
+      },
+ 
+      searchData: function(options){
+        this.pageState = "seaching";
+
+        // messageとかloadingとかはbindしてるわけじゃないから反応しないっぽい...ここで書かずにwatchで書きたい...
+        this.message = "けんさくちゅう...";
+        this.loading = true;
+        // 最初に検索した検索オプションを使う
+        options = options === undefined ? this.searchOptions : options;
+        
         return new Promise((resolve, reject) => {
           google.script.run
             .withSuccessHandler((result) => {
-              this.message = "けんさくけっか！";
-              this.loading = false;
+              this.pageState = "searched";
               resolve(result);
             })
             .withFailureHandler((error) => {
               console.log(error);
+              this.pageState = null; // あとで考える
               reject(error);
             })
-            .search(JSON.stringify(seachOptions));
+            .search(JSON.stringify(options));
         });
       },
     },
+
     created: function(){
+      // ページの状態をデフォルトに
+      this.pageState = "welcome";
       // apps script側でテーブルのやつ叩いとく
         google.script.run
           .withSuccessHandler((result) => {

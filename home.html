@@ -31,13 +31,11 @@
           </span>
         </p>
       </div>
+    </div>
 
-      
-    </div>
-    <div v-show="paginateState2 === 'ready'">
-      なんか画面
-    </div>
-    <div v-show="paginateState2 !== 'ready'">
+    <!-- <div v-show="paginateState !== null"> -->
+    <div v-show="pageState !== 'welcome'">
+    <div>
       <!-- ページネーション -->
       <?!= include('pagination'); ?>
       <!-- table (main contents) -->

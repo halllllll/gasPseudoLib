@@ -6,8 +6,8 @@
         </tr>
         </thead>
         <tbody class="mb-30">
-        <tr v-for="(row, idx) in items" v-bind:key="idx" class="bg-gray-100 border-b border-gray-700 mx-4 my-8">
-            <td v-for="h in sheetHeader" class="border px-3 py-2 whitespace-nowrap text-left">{{row[h]}}</td>
+        <tr v-for="(row, idx) in resp.data" v-bind:key="idx" class="bg-gray-100 border-b border-gray-700 mx-4 my-8">
+            <td v-for="h in searchOptions.header" class="border px-3 py-2 whitespace-nowrap text-left">{{row[h]}}</td>
         </tr>
         </tbody>
     </table>

@@ -139,13 +139,16 @@ function genGenreTable(){
 function search(options){
     // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
     const decodedObj = JSON.parse(options);
+    console.log(`decodeObj:`);
+    console.log(decodedObj);
     const header = decodedObj.header;
     const words = decodedObj.words;
     const page = decodedObj.page;
     const andOrOption = decodedObj.andOrOption;
     const includeAuthorName = decodedObj.includeAuthorName;
-    const experimental_hiraganaMode = decodedObj.experimental_hiraganaMode;
+    const experimental_hiraganaMode = decodedObj.hiraganaMode;
     let searchWords = words.trim().replaceAll(/(　| |\\|\|\s)+/g, " ").split(" ");
+
     switch(andOrOption){
         case "OR":
             searchWords = `(${searchWords.join("|")})`;
