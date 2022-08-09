@@ -182,7 +182,7 @@ function countKanaFilled_(){
         if(k === "")continue;
         count++;
     }
-    SpreadsheetApp.getUi().alert(`「${kanaHeader}」 記入数 \n${count} / ${kanaVal.length} (${Math.round((count/kanaVal.length * 100) * 1000)/1000}%)}`);
+    SpreadsheetApp.getUi().alert(`「${kanaHeader}」 記入数 \n${count} / ${kanaVal.length} (${Math.round((count/kanaVal.length * 100) * 1000)/1000}%)`);
 
 }
 
