@@ -1,6 +1,14 @@
-<div class="bg-blue-100 border border-blue-500 text-blue-700 px-4 py-3 rounded" role="alert">
-    <p class="font-bold">けんさくじょうけん</p>
-    <p class="text-sm">けんさくワード: <span class="border-gray-200">{{searchWords}}</span></p>
-    <p class="text-sm">OR/AND: <span class="border-gray-200">{{andOrOption}}</span></p>
-    <p class="font-bold">{{resp.curPage}} / {{resp.maxPage}} ページ目 ({{resp.resultNum}}件 ヒット！)</p>
+<div class="mx-10">
+    <div class="p-5 bg-yellow-100 border border-yellow-600 text-black-100 rounded-xl" role="alert">
+        <p class="font-bold">けんさくじょうけん</p>
+        <div class="p-2 text-sm">
+            <ul>
+                <li class="">けんさくワード: "<span class="border-gray-200">{{searchWords}}"</span></li>
+                <li class="">OR/AND: <span class="border-gray-200">{{searchOptions.andOrOption}}</span><li>
+                <li class="">人名: <span class="">{{ searchOptions.includeAuthorName ? "含む" : "含まない" }}</span></li>
+                <li class="">ひらがなモード(β): {{searchOptions.hiraganaMode ? "オン！" : "オフ！"}}</li>
+            </ul>
+            <p class="font-bold">{{resp.curPage}} / {{resp.maxPage}} ページ目 ({{resp.resultNum}}件 ヒット！)</p>
+        </div>
+    </div>
 </div>

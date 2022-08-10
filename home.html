@@ -17,10 +17,10 @@
     <div class="container mx-auto">
       <div class="px-8 py-4">
         <!-- 入力フォーム -->
-        <?!= include('seachForm'); ?>
+        <?!= include('searchForm'); ?>
         <!-- message -->
         <div class="flex">
-          <p class="inline-flex items-center">
+          <p class="inline-flex items-center px-8">
             {{message}}
             <span class="ml-5">
               <svg v-show="loading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="motion-reduce:hidden animate-spin -ml-1 h-5 w-5 text-black">
@@ -31,23 +31,25 @@
           </p>
         </div>
       </div>
-
-      <div v-show="pageState !== 'welcome'">
-          <!-- ページネーション -->
-          <?!= include('pagination'); ?>
-          <!-- table (main contents) -->
-          <?!= include('table'); ?>
-          <!-- ページネーション -->
-          <?!= include('pagination'); ?>
-          <!-- テスト用だよ <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4" role="alert">
-            <p class="mx-auto m-8 px-5">以下はただのデバッグ用なので（GASだとめちゃくちゃしんどい）気にしないでください</p>
-          </div>
-          <pre>{{$data}}</pre> -->
+      <transition name="fade">
+        <div v-show="pageState === 'searched'">
+            <?!= include('result'); ?>
+            <!-- ページネーション -->
+            <?!= include('pagination'); ?>
+            <!-- table (main contents) -->
+            <?!= include('table'); ?>
+            <!-- ページネーション -->
+            <?!= include('pagination'); ?>
+            <!-- テスト用だよ <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4" role="alert">
+              <p class="mx-auto m-8 px-5">以下はただのデバッグ用なので（GASだとめちゃくちゃしんどい）気にしないでください</p>
+            </div>
+            <pre>{{$data}}</pre> -->
         </div>
-      </div>
+      </transition>
     </div> <!-- conntainer end -->
-  <!-- footer -->
-  <?!= include('footer'); ?>
+    <!-- footer -->
+    <?!= include('footer'); ?>
+  </div>
   <!-- vue.js -->
   <script src="https://unpkg.com/vue@3.2.20"></script>
   <?!= include('js'); ?>
