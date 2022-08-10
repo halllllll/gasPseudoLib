@@ -39,7 +39,7 @@
       pageState: function(curState, oldState){
         console.log(curState);
         if(curState === "welcome"){
-          this.message = "てすとだよ";
+          this.message = "けんさくしてみよう！";
           this.loading = false;
         }else if(curState === "searching"){
           // messageもloadingもbindじゃないので即時に変わるわけではない...
@@ -47,6 +47,9 @@
           this.message = "けんさくちゅう...";
           this.loading = true;
         }else if(curState === "searched"){
+          console.log(this.resp.maxPage, this.resp.curPage, this.resp.resultNum);
+          // watchでやるとrespの反映が追いついてなかった
+          // this.message = `けんさくけっか！ \n ${this.resp.maxPage}ページ中　${this.resp.curPage}目 (${this.resp.resultNum} 件ヒット！)`;
           this.message = "けんさくけっか！";
           this.loading = false;
         }else{
@@ -89,7 +92,7 @@
       },
  
       searchData: function(options){
-        this.pageState = "seaching";
+        this.pageState = "searching";
 
         // messageとかloadingとかはbindしてるわけじゃないから反応しないっぽい...ここで書かずにwatchで書きたい...
         this.message = "けんさくちゅう...";
