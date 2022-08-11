@@ -26,7 +26,7 @@ function genMenu_(){
  * openbdはどんどんapi叩いてくれと言っているのでそうする
  * 連続押下を防ぐためのフラグを用意したい（あとでやる）
  */
-function convertTitleToKanaByOpenBD_(){
+ function convertTitleToKanaByOpenBD_(){
     const properties = PropertiesService.getScriptProperties();
     // 排他的フラグでブロック
     const execUser = properties.getProperty(CONVERTING_KANA_USER);
@@ -63,34 +63,76 @@ function convertTitleToKanaByOpenBD_(){
     }
     const startIdx = taskIdx;
     let newReggisted = 0;
-    // let result = [];
+
+    // ここでAPIを叩く　10000件文をまとめて取得する
+    // urlのパラメータが2kbというfetchの条件があった...
+    // どこまでOKか確かめてみる
+    /**
+     * 
+     * @param {number} start 
+     * @param {number} bytesLimit 
+     * @param {string[]} arr 
+     * @returns {number} 
+     */
+    const nibutan = (start, bytesLimit=2000, arr) => {
+        let [left, middle, right] = [start, null, arr.length];
+        while(left < right){
+            middle = Math.floor(((right - left) / 2)) + left;
+            const subArrStr = arr.slice(start, middle).join(",");
+            const bytes = Utilities.newBlob(`https://api.openbd.jp/v1/get?isbn=${subArrStr}`);
+            if(bytes.getBytes().length < bytesLimit){
+                left = middle + 1;
+            }else{
+                right = middle - 1;
+            }
+        }
+        return middle-1;
+    }
+    let limitIdx = nibutan(taskIdx, 2000, isbnVal);
+    console.log(`${taskIdx}から${limitIdx}までやるよ`);
+    let resp = getBookData_(isbnVal.slice(taskIdx, limitIdx).join(","));
+    let respIdx = 0;
+
+
     for(let i = taskIdx; i < isbnVal.length; i++){
+        // もし取得してる分のopenbd api response dataが尽きたら再取得
+        if(respIdx === resp.length){
+            console.log("===================================");
+            console.log(`2kb制限 ${limitIdx}に達したので更新`);
+            limitIdx = nibutan(i, 2000, isbnVal);
+            console.log(`更新しました ${limitIdx}`);            
+            resp = getBookData_(isbnVal.slice(i, limitIdx).join(","));
+            respIdx = 0;
+        }
+
         // 実行時間チェック
         const curTime = new Date();
         const difTime = parseInt((curTime.getTime() - startTime.getTime())/(1000*60));
         if(difTime >= limitMin){
             // 実行猶予時間を越えているので次のトリガー設定しておわり
-            console.log(`range start from: ${startIdx}, end ${taskIdx-1}`);
-            properties.setProperty("taskIdx", taskIdx);
-            console.log(`and, result : ${(taskIdx - 1) - startIdx}, new : ${newReggisted}`);
+            console.log(`range start from: ${startIdx}, end ${i-1}`);
+            properties.setProperty("taskIdx", i);
+            console.log(`and, result : ${(i - 1) - startIdx}, new : ${newReggisted}`);
             const nextTrigger = ScriptApp.newTrigger("convertTitleToKanaByOpenBD_").timeBased().after(30000).create(); // 30秒後
             return;
         }
+
 
         // 都度rangeで取得したい衝動がある（一個一個BGColorつけたい)
         const cell = range.getCell(i+1, 1);
 
         // ここから取得
-        const curIsbn = isbnVal[i];
-        const data = getBookData_(curIsbn);
-        const kanaTitle = data[0] !== null ? data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkey : "";
-        console.log(`kanaTitle? ${kanaTitle}`);
+        // const curIsbn = isbnVal[i];
+        // const data = TestGetBookData_(curIsbn);
+        const kanaTitle = resp[respIdx] !== null ? resp[respIdx].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkey : "";
+        respIdx++;
+
         // collationkeyが存在しないパターンがある
         if(kanaTitle === undefined || kanaTitle === "" || kanaTitle === null){
-            console.info(`${curIsbn}: openbd上でonix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkeyがみつかりませんでした`);
+            // console.info(`${isbnVal[taskIdx]}: openbd上でonix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkeyがみつかりませんでした`);
             continue;
         }
-        console.log(i, titleVal[i], curIsbn, kanaTitle, kanaToHira_(kanaTitle), cell.getDisplayValue());
+        console.log(i, titleVal[i], isbnVal[i], kanaTitle, kanaToHira_(kanaTitle), cell.getDisplayValue());
 
         cell.setBackground("#97bad9");
         cell.setValue(kanaToHira_(kanaTitle));
@@ -99,18 +141,6 @@ function convertTitleToKanaByOpenBD_(){
     properties.deleteProperty("taskIdx");
     properties.deleteProperty(CONVERTING_KANA_USER);
     SpreadsheetApp.getUi().alert("openbdから反映する処理が完了しました");
-}
-
-/**
- * API叩くところ(テスト)
- */
-function apitest(){
-    const testData = ["4-7743-1340-5", "978-4-591-15523-3", "978-4-477-02549-0", "4-652-02083-X", "4-00-113147-1"];
-    for(let [idx, v] of testData.entries()){
-        const data = getBookData_(v);
-        const kanaTitle = data[0] !== null ? data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.collationkey : "";
-        console.log(v, kanaTitle, kanaToHira_(kanaTitle));
-    }
 }
 
 /**
@@ -167,6 +197,9 @@ function kanaToHira_(kana) {
  */
 function getBookData_(isbn){
     const url = `https://api.openbd.jp/v1/get?isbn=${isbn}`;
+    // URL Fetch parameter limit 確認
+    const bytes = Utilities.newBlob(url).getBytes().length;
+    console.log(`バイト長: ${bytes}`);
     const res = UrlFetchApp.fetch(url);
     return JSON.parse(res.getContentText());
 }
