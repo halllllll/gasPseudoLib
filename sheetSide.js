@@ -30,7 +30,7 @@ function genMenu_(){
     const properties = PropertiesService.getScriptProperties();
     // 排他的フラグでブロック
     const execUser = properties.getProperty(CONVERTING_KANA_USER);
-    // 時間でのトリガーならブロックしない
+    // 時間でのトリガーならブロックしないf
     if(execUser === null){
         properties.setProperty(CONVERTING_KANA_USER, Session.getActiveUser().getEmail());
     }else if(execUser !== Session.getActiveUser().getEmail()){
@@ -74,7 +74,7 @@ function genMenu_(){
      * @param {string[]} arr 
      * @returns {number} 
      */
-    const nibutan = (start, bytesLimit=2000, arr) => {
+    const nibutan = (start, bytesLimit, arr) => {
         let [left, middle, right] = [start, null, arr.length];
         while(left < right){
             middle = Math.floor(((right - left) / 2)) + left;
@@ -86,7 +86,7 @@ function genMenu_(){
                 right = middle - 1;
             }
         }
-        return middle-1;
+        return left-1;
     }
     let limitIdx = nibutan(taskIdx, 2000, isbnVal);
     console.log(`${taskIdx}から${limitIdx}までやるよ`);
