@@ -141,7 +141,7 @@ function TestConvertTitleToKanaByOpenBD(){
             continue;
         }
         // console.log(i, titleVal[i], isbnVal[i], kanaTitle, kanaToHira_(kanaTitle), cell.getDisplayValue());
-
+        console.log(i, titleVal[i], isbnVal[i] ,kanaTitle);
         // cell.setBackground("#97bad9");
         // cell.setValue(kanaToHira_(kanaTitle));
         newReggisted++;
