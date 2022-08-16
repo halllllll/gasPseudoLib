@@ -52,7 +52,7 @@ function showThisURL() {
 function doGet(){
     const html = HtmlService.createTemplateFromFile('home').evaluate();
     html.addMetaTag('viewport', 'width=device-width, initial-scale=1');
-    html.setTitle("ほんのけんさく（たいけんばん）");
+    html.setTitle(HEADER_TITLE);
     html.setFaviconUrl("https://img.icons8.com/flat-round/344/26e07f/book.png");
 
     const triggerName = "setTriggerForCache";
