@@ -13,14 +13,15 @@
       // - hiraganaMode
 
       searchWords: "",
-      andOrOption: "OR", // html側でchecked入れててもデフォルトは空文字らしいので
+      andOrOption: "OR", // html側でchecked入れててもvueではデフォルトで空文字
       includeAuthorName: false,
       hiraganaMode: false,
       searchOptions : {}, // 検索条件保存用
 
       resp: {},
 
-      // ヘッダ―情報　サーバサイドにも渡すけどここにベタ書きしてるのはなんか違う気がする
+      // ヘッダ―情報
+      // サーバサイド側にもベタ書きしているのであとでどちらかに固定する予定
       tableHeader: [
         {"name": "本の名前", "thWidth": "w-2/5"},
         {"name": "人名", "thWidth": "w-1/4"},
@@ -42,14 +43,10 @@
           this.message = "けんさくしてみよう！";
           this.loading = false;
         }else if(curState === "searching"){
-          // messageもloadingもbindじゃないので即時に変わるわけではない...
-          // mustacheじゃなくてタグの値にできないかな
           this.message = "けんさくちゅう...";
           this.loading = true;
         }else if(curState === "searched"){
           console.log(this.resp.maxPage, this.resp.curPage, this.resp.resultNum);
-          // watchでやるとrespの反映が追いついてなかった
-          // this.message = `けんさくけっか！ \n ${this.resp.maxPage}ページ中　${this.resp.curPage}目 (${this.resp.resultNum} 件ヒット！)`;
           this.message = "けんさくけっか！";
           this.loading = false;
         }else{
@@ -76,7 +73,7 @@
       searchStart: async function(event){
         // 検索開始 = 1ページ目から表示
         console.log(`検索ボタン押下`);
-        // 検索ボタンを押したときのみ検索オプションを反映する headerはなんか最初から入ってる（なんでだっけ）
+        // 検索ボタンを押したときのみ検索オプションを反映する
         this.searchOptions = {
           "header": ["title", "author", "publisher", "genre"],
           "words": this.searchWords,
@@ -93,8 +90,6 @@
  
       searchData: function(options){
         this.pageState = "searching";
-
-        // messageとかloadingとかはbindしてるわけじゃないから反応しないっぽい...ここで書かずにwatchで書きたい...
         this.message = "けんさくちゅう...";
         this.loading = true;
         // 最初に検索した検索オプションを使う
@@ -119,17 +114,13 @@
     created: function(){
       // ページの状態をデフォルトに
       this.pageState = "welcome";
-      // apps script側でテーブルのやつ叩いとく
+      // apps script側で分類テーブル再取得
         google.script.run
           .withSuccessHandler((result) => {
-            console.log(`was table created?`);
             console.log(result);
-            // resolve(result);
           })
           .withFailureHandler((error) => {
-            console.log(`omg some error occured when creating table...`);
-            console.log(error);
-            reject(error);
+            console.error(error);
           })
           .genGenreTable();
 
@@ -141,7 +132,6 @@
           })
           .withFailureHandler(err =>{
             console.error(err);
-            // alert(`ERROR!!!!\n${err}`);
             this.logoImg = "https://4.bp.blogspot.com/-gUQWvlEhd90/WR_LT3yiH0I/AAAAAAABEfE/87r5mxWuTCYiufU3zurk5dhm-oaOyKS_QCLcB/s800/text_pop_koukai.png";
           })
           .getBase64UrlOnDriveImage(this.fileId);
