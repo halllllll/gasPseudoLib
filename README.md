@@ -1,7 +1,7 @@
 # whats this? 📖
 [![clasp](https://img.shields.io/badge/built%20with-clasp-4285f4.svg)](https://github.com/google/clasp)
 
-For my work, as an Information-Communication Technology Supporter for Elementary School（in Japanese, ICT支援員）, Searching Application for Library collection by Google Apps Script.
+For my work/job, as an Information-Communication Technology Supporter for Elementary School（in Japanese, ICT支援員）, Searching Application for Library collection by Google Apps Script.
 
 小学生が初めて図書室・図書館を使用する前に、蔵書検索の体験ができたらいいなということで、ICT支援員の支援業務の一貫として作ろうとしてます（WIP）　
 
