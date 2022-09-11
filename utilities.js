@@ -36,7 +36,7 @@ function convertA1toColNum_(strCol){
   try{
     const file = DriveApp.getFileById(fileId);
     if(file === null){
-      console.error("ドライブ上のファイルじゃないかも");
+      console.error("ドライブ上のファイルじゃないかもしれません");
       throw new Error("is this file on Google Drive?");
     }
     if(!accesibleDrive_(file)){
@@ -80,4 +80,3 @@ function createImageBase64_(file){
   const base64Url = `data:${contentType};base64,${base64Data}`;
   return base64Url;
 }
-

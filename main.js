@@ -1,16 +1,15 @@
 const ss = SpreadsheetApp.getActive();
-const DataSheet = ss.getSheetByName("本番データ");
+const DataSheet = ss.getSheetByName("蔵書データ");
 const GenreSheet = ss.getSheetByName("分類表");
 
-// vueのcreatedで初回だけ叩いて予めテーブル情報を生成しとく
-// ->失敗したのでキャッシュする方向に転換
+// 起動時にキャッシュを再取得
 const caches = CacheService.getScriptCache();
 
 /**
- * 時限で勝手にキャッシュする　cacheserviceの最大時間は6時間らしい
+ * 時限で自動的にキャッシュする
  * これはdoGetから呼ばれ、毎回チェックして抜ける
  */
-function setTriggerForCache(){
+ function setTriggerForCache(){
     const triggerName = "setTriggerForCache";
 
     // チェック
@@ -20,20 +19,21 @@ function setTriggerForCache(){
     }
     console.log(`expired(may be)`);
     // triggerの発火タイミング
-    // cacheの上限が6時間だけどチキってその半分ということにする(milliseconds)
-    const cacheResetInterval = 60*60*6*1000 / 2;
+    // cacheの上限は6時間だが余裕をもって3時間後に発火
+    // ミリ秒で指定
+    const cacheResetInterval = 3*60*60*1000;
     
     // Map object
     const genreTableMap = genGenreTable();
-    const genreTableObj = {
-        triggerName: "生きとるよ",
-    };
+    if(genreTableMap.size <= 1){
+      throw new Error("蔵書シートに請求番号を記入してください");
+    }
+    const genreTableObj = {};
     genreTableMap.forEach((v, k)=>{
         genreTableObj[k] = v;
     });
-    
-    caches.putAll(genreTableObj, 60*60*6); // up to limit is 6 hours(21600 sec)
-
+    // cacheの保持時間は秒で指定
+    caches.putAll(genreTableObj, 60*60*6);
     const triggers = ScriptApp.getProjectTriggers();
     for(let trigger of triggers){
         if(trigger.getHandlerFunction() === triggerName){
@@ -43,7 +43,6 @@ function setTriggerForCache(){
     // 自分自身にトリガーをセット
     ScriptApp.newTrigger(triggerName).timeBased().after(cacheResetInterval).create();
 }
-
 
 function showThisURL() {
   console.log(ss.getUrl());
@@ -59,7 +58,7 @@ function doGet(){
     // チェック
     if(caches.get(triggerName) == null){
         console.log(`cache~~~`);
-        setTriggerForCache(); // 時限で値をキャッシュするやつ
+        setTriggerForCache(); // 時限で値をキャッシュする
     }
 
     return html;
@@ -87,7 +86,7 @@ function genGenreTable(){
     const midTable = new Map();
     // 実テーブル
     const table = new Map();
-    // めんどくさいのでヘッダーを含めてテーブル作る
+    // 一応 ヘッダーを含めてテーブル作る
     const value = GenreSheet.getDataRange().getDisplayValues();
     for(let [idx, v] of value.entries()){
         if(v.length!==3){
@@ -96,11 +95,10 @@ function genGenreTable(){
         v = v.map(ele => (ele.trim()).toString());
         table.set(v[0], v[1]);  // key, value. ひらがなは一旦無視
     }
-    // 「半角数が3つ並ぶ」にマッチ `g`オプションがないと最初のやつにマッチ
     // 先頭がEだと絵本らしい（これが一般的なのかは不明）
     const pattern = /[0-9]{3}|^E/i;
 
-    // 本番データから分類の部分の列だけとってきてみる
+    // 本番データから分類の部分の列だけ取得
     const sayQNumb = DataSheet.getRange(`${COL_GENRE}2:${COL_GENRE}`).getDisplayValues();
     for(let [idx, v] of sayQNumb.entries()){
         const content = v.toString().replaceAll(/\s/img, "");
@@ -137,7 +135,6 @@ function genGenreTable(){
  * reference: https://qiita.com/merarli/items/77c649603d5df4caaaf9
  */
 function search(options){
-    // とくにjsonとか考えなくても文tableHeader2字列のまま取得できた 配列も同じ
     const decodedObj = JSON.parse(options);
     console.log(`decodeObj:`);
     console.log(decodedObj);
@@ -157,7 +154,7 @@ function search(options){
             searchWords = "^" + searchWords.map(word => `(?=.*${word})`).join("");
             break;
         default:
-            console.log(`why option besides or/and ?`);
+            console.error(`why option besides or/and ? option: ${andOrOption}`);
     }
     
     console.log(`search target words: ${searchWords}`);
@@ -172,9 +169,7 @@ function search(options){
             // 先頭がEだと絵本らしい（これが一般的なのかは不明）
             genre = genre.match(/[0-9]{3}|^E/i);
             if(genre != null){
-                // なぜか配列になってる regexのパターンでgは指定してないのだが
                 genre = genre.length >= 1 ? genre[0] : genre;
-                // tmpObj["genre"] = genreTable.get(genre);
                 tmpObj["genre"] = `${genre}:${caches.get(genre)}`;
             }else{
                 tmpObj["genre"] = `みとうろく(${String(item)}) `;
@@ -194,8 +189,8 @@ function search(options){
     // 検索対象　人名（オリジナル）
     const authorRange = DataSheet.getRange(`${COL_AUTHOR}2:${COL_AUTHOR}`);
 
-    // ひらがなモード仮　しょうがないのでここでデータを入れ替える   オリジナルの名前の列とひらがなの名前の列を入れ替える
-
+    // ひらがなモード仮
+    // TODO: オリジナルの名前の列とひらがなの名前の列を入れ替えるが、ほかにいい方法があるはず
     const values = experimental_hiraganaMode ? 
           DataSheet.getDataRange().getDisplayValues().map(row=>{
               [row[kanaTitleColIdx], row[titleColIdx]] = [row[titleColIdx], row[kanaTitleColIdx]];
@@ -205,7 +200,6 @@ function search(options){
 
     // 1ページあたりの表示件数
     const limitNum = 50;
-    // 返すオブジェクト
     let retObj = {
         'curPage': page,
         'countLimit': limitNum,
@@ -213,16 +207,16 @@ function search(options){
     // 検索
     if(words !== ""){
         const titleFinder = titleRange.createTextFinder(searchWords).useRegularExpression(true);
-        // 人名での検索 データに含まれる著作の区切りである「／」より手前で検索（「さく」とか「やく」とか「文」とか「著」とかが人名に含まれてることがある）
+        // 人名での検索 データに含まれる著作の区切りである「／」より手前で検索（「さく」「やく」「文」「著」が人名に含まれてることがある）
         const targetAuthorRanges = includeAuthorName ? authorRange.createTextFinder(`${searchWords}.*(?=／).*`).useRegularExpression(true).findAll() : null;
-        // rangeって合成できるんだっけ 最初から登場順にできればいいのだが
+        // TODO: merge ranges for appearance order on sheet
         const targetTitleRanges = titleFinder.findAll();
         if(includeAuthorName)targetTitleRanges.push(...targetAuthorRanges);
         const curTargetTitleRanges = targetTitleRanges.slice((page-1)*limitNum, page*limitNum);
         // 検索オプション（本のタイトル+人名など）を使ったときの重複排除とソート用
         const addedData = new Map();
 
-        // 重複排除 ほんとはソートもしたいけどあとでやる....
+        // 重複 排除
         const data = curTargetTitleRanges.reduce((pre, _, rangeArrIdx, rangeArr) => {
             const curObj = rangeArr[rangeArrIdx];
             const rNum = curObj.getRowIndex()-1;
@@ -243,9 +237,9 @@ function search(options){
         retObj['maxPage'] = Math.ceil(targetTitleRanges.length/limitNum)
         retObj['data'] = data;
     }else{        
-        console.log("検索ワード空だったよ～");
+        console.log("検索ワードが空");
         values.shift();
-        // ページはフロント側で先にインクリメントしてた...
+        // ページはフロント側で先にインクリメントしている
         let curVal = values.slice((page-1)*limitNum, page*limitNum);
         const data = curVal.map((row)=>{
             let tmpObj = {};
@@ -260,7 +254,7 @@ function search(options){
         retObj['maxPage'] = Math.ceil(values.length/limitNum);
         retObj['data'] = data;
     }
-    // 取れたかチェック
+    // 取得できたかチェック
     if(Object.keys(retObj).length === 0){
         retObj['successed'] = false;
     }else{
