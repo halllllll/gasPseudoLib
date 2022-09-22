@@ -30,7 +30,7 @@ const caches = CacheService.getScriptCache();
     }
     const genreTableObj = {};
     genreTableMap.forEach((v, k)=>{
-        genreTableObj[k] = v;
+        if(v!=="" && k!=="")genreTableObj[k] = v;
     });
     // cacheの保持時間は秒で指定
     caches.putAll(genreTableObj, 60*60*6);
